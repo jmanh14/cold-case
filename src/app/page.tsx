@@ -51,7 +51,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         height: 1,
         background: 'var(--red)',
         marginBottom: 32,
-        animation: 'fadeIn 1s ease forwards',
       }} />
 
       {/* Eyebrow */}
@@ -62,8 +61,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         color: 'var(--cream-dim)',
         textTransform: 'uppercase',
         marginBottom: 16,
-        animation: 'fadeIn 1s ease 0.2s both forwards',
-        opacity: 0,
       }}>
         Detective Bureau — Case Division
       </div>
@@ -76,8 +73,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         letterSpacing: 8,
         lineHeight: 1,
         textAlign: 'center',
-        animation: 'fadeIn 1s ease 0.4s both forwards, flicker 6s 1s infinite',
-        opacity: 0,
         textShadow: '0 0 40px rgba(139, 26, 26, 0.4)',
       }}>
         COLD
@@ -94,8 +89,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         marginTop: 20,
         marginBottom: 56,
         textAlign: 'center',
-        animation: 'fadeIn 1s ease 0.8s both forwards',
-        opacity: 0,
       }}>
         Every case has a truth. Find it.
       </div>
@@ -107,8 +100,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         gap: 14,
         width: '100%',
         maxWidth: 300,
-        animation: 'fadeIn 1s ease 1.2s both forwards',
-        opacity: 0,
       }}>
         <TitleButton
           onClick={() => navigate('setup')}
@@ -131,7 +122,6 @@ function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
         color: 'var(--cream-dim)',
         opacity: 0.3,
         fontFamily: 'var(--font-courier)',
-        animation: 'fadeIn 1s ease 1.6s both forwards',
       }}>
         PROCEDURAL MYSTERY ENGINE
       </div>
