@@ -23,6 +23,8 @@ Generate a fully realized mystery case with ${suspectCount} suspects. Difficulty
 
 The killer must be one of the suspects. Plant real clues that point to them and red herrings that point to others. Every suspect should have a believable motive even if they are innocent.
 
+IMPORTANT: Every evidence item's "location" field MUST exactly match one of the location "id" values. Do not use location names — use the id strings like "location_1", "location_2" etc.
+
 Respond ONLY with valid JSON, no markdown, no explanation:
 {
   "id": "unique_case_id",
@@ -32,7 +34,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
   "setting": "Vivid 2-3 sentence description of the setting and atmosphere",
   "victim": {
     "name": "Full name",
-    "age": 45,
+    "age": ${Math.floor(Math.random() * 60) + 25},
     "occupation": "occupation",
     "background": "2-3 sentence background",
     "secrets": ["secret 1", "secret 2"]
@@ -72,7 +74,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
     {
       "id": "evidence_1",
       "name": "Evidence name",
-      "description": "What it looks like and where exactly it was found",
+      "description": "MUST be one of the location ids from the locations array (e.g. location_1, location_2)",
       "location": "location_id where this is found",
       "discovered": false,
       "isRedHerring": false,
