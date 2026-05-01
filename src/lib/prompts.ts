@@ -25,6 +25,8 @@ The killer must be one of the suspects. Plant real clues that point to them and 
 
 IMPORTANT: Every evidence item's "location" field MUST exactly match one of the location "id" values. Do not use location names — use the id strings like "location_1", "location_2" etc.
 
+Be highly creative with all names — victims, suspects, and locations should feel unique and fitting for the ${genre} genre. Avoid common placeholder names like John Smith or Jane Doe.
+
 Respond ONLY with valid JSON, no markdown, no explanation:
 {
   "id": "unique_case_id",
@@ -33,7 +35,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
   "difficulty": "${difficulty}",
   "setting": "Vivid 2-3 sentence description of the setting and atmosphere",
   "victim": {
-    "name": "Full name",
+    "name": "A unique full name fitting the ${genre} genre and setting. Be creative and varied.",
     "age": ${Math.floor(Math.random() * 60) + 25},
     "occupation": "occupation",
     "background": "2-3 sentence background",
