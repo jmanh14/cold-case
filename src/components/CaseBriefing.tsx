@@ -97,30 +97,38 @@ export default function CaseBriefing() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: 16,
+          gap: 20,
         }}>
           <CaseCard label="VICTIM">
             <div style={{
               fontFamily: 'var(--font-playfair)',
-              fontSize: 20,
+              fontSize: 28,
               color: 'var(--cream)',
-              marginBottom: 4,
+              marginBottom: 6,
+              lineHeight: 1.1,
             }}>
               {activeCase.victim.name}
             </div>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 12,
-              color: 'var(--cream-dim)',
-              marginBottom: 8,
+              fontSize: 13,
+              color: 'var(--red-bright)',
+              marginBottom: 12,
+              letterSpacing: 1,
             }}>
               {activeCase.victim.age} — {activeCase.victim.occupation}
             </div>
             <div style={{
+              width: 40,
+              height: 1,
+              background: 'var(--border-bright)',
+              marginBottom: 12,
+            }} />
+            <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 12,
+              fontSize: 13,
               color: 'var(--cream-dim)',
-              lineHeight: 1.6,
+              lineHeight: 1.8,
             }}>
               {activeCase.victim.background}
             </div>
@@ -129,22 +137,43 @@ export default function CaseBriefing() {
           <CaseCard label="THE CRIME">
             <div style={{
               fontFamily: 'var(--font-playfair)',
-              fontSize: 18,
+              fontSize: 28,
               color: 'var(--red-bright)',
-              marginBottom: 8,
+              marginBottom: 6,
               textTransform: 'capitalize',
+              lineHeight: 1.1,
             }}>
               {activeCase.crime.type}
             </div>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 12,
+              fontSize: 13,
+              color: 'var(--cream-dim)',
+              marginBottom: 12,
+              letterSpacing: 1,
+            }}>
+              {activeCase.crime.time}
+            </div>
+            <div style={{
+              width: 40,
+              height: 1,
+              background: 'var(--border-bright)',
+              marginBottom: 12,
+            }} />
+            <div style={{
+              fontFamily: 'var(--font-courier)',
+              fontSize: 13,
               color: 'var(--cream-dim)',
               lineHeight: 1.8,
             }}>
-              <div><span style={{ color: 'var(--cream)' }}>Method:</span> {activeCase.crime.method}</div>
-              <div><span style={{ color: 'var(--cream)' }}>Time:</span> {activeCase.crime.time}</div>
-              <div><span style={{ color: 'var(--cream)' }}>Location:</span> {activeCase.crime.location}</div>
+              <div style={{ marginBottom: 6 }}>
+                <span style={{ color: 'var(--cream)', letterSpacing: 1 }}>METHOD</span>
+                <br />{activeCase.crime.method}
+              </div>
+              <div>
+                <span style={{ color: 'var(--cream)', letterSpacing: 1 }}>LOCATION</span>
+                <br />{activeCase.crime.location}
+              </div>
             </div>
           </CaseCard>
         </div>
@@ -200,16 +229,16 @@ function CaseCard({ label, children }: { label: string, children: React.ReactNod
     <div style={{
       background: 'var(--bg-surface)',
       border: '1px solid var(--border-bright)',
-      padding: '16px',
+      padding: '24px 20px',
       position: 'relative',
     }}>
       <div style={{
         fontFamily: 'var(--font-courier)',
-        fontSize: 9,
+        fontSize: 12,
         letterSpacing: 4,
         color: 'var(--red-bright)',
         textTransform: 'uppercase',
-        marginBottom: 12,
+        marginBottom: 16,
       }}>
         {label}
       </div>
