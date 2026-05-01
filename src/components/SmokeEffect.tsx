@@ -32,16 +32,16 @@ export default function SmokeEffect() {
     window.addEventListener('resize', resize)
 
     function spawnParticle() {
-      const x = canvas!.width * 0.5 + (Math.random() - 0.5) * 60
+      const x = Math.random() * canvas!.width
       particles.current.push({
         x,
-        y: canvas!.height * 0.75,
-        size: Math.random() * 18 + 8,
+        y: canvas!.height + 20,
+        size: Math.random() * 20 + 15,
         opacity: 0,
-        speed: Math.random() * 0.4 + 0.2,
-        drift: (Math.random() - 0.5) * 0.3,
+        speed: Math.random() * 0.5 + 0.3,
+        drift: (Math.random() - 0.5) * 0.4,
         age: 0,
-        maxAge: Math.random() * 200 + 150,
+        maxAge: Math.random() * 400 + 300,
       })
     }
 
@@ -52,7 +52,7 @@ export default function SmokeEffect() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       spawnTimer++
-      if (spawnTimer % 18 === 0) spawnParticle()
+      if (spawnTimer % 6 === 0) spawnParticle()
 
       particles.current = particles.current.filter(p => p.age < p.maxAge)
 
@@ -60,23 +60,33 @@ export default function SmokeEffect() {
         p.age++
         p.y -= p.speed
         p.x += p.drift
-        p.size += 0.04
+        p.size += 0.15
 
         const progress = p.age / p.maxAge
-        p.opacity = progress < 0.15
-          ? progress / 0.15 * 0.18
-          : progress > 0.7
-          ? (1 - (progress - 0.7) / 0.3) * 0.18
-          : 0.18
+        p.opacity = progress < 0.2
+          ? progress / 0.2 * 0.15
+          : progress > 0.6
+          ? (1 - (progress - 0.6) / 0.4) * 0.15
+          : 0.15
 
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size)
-        grad.addColorStop(0, `rgba(180, 160, 140, ${p.opacity})`)
-        grad.addColorStop(1, `rgba(180, 160, 140, 0)`)
+        const grad = ctx.createRadialGradient(
+          p.x, p.y, 0,
+          p.x, p.y, p.size
+        )
+        grad.addColorStop(0, `rgba(160, 140, 120, ${p.opacity})`)
+        grad.addColorStop(0.4, `rgba(140, 120, 100, ${p.opacity * 0.6})`)
+        grad.addColorStop(1, `rgba(120, 100, 80, 0)`)
+
+        ctx.save()
+        ctx.translate(p.x, p.y)
+        ctx.scale(1, 2.5)
+        ctx.translate(-p.x, -p.y)
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
         ctx.fillStyle = grad
         ctx.fill()
+        ctx.restore()
       }
 
       animRef.current = requestAnimationFrame(tick)
