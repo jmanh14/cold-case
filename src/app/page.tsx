@@ -1,65 +1,184 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { useCaseStore } from '@/store/caseStore'
+import CaseSetup from '@/components/CaseSetup'
+import CaseBriefing from '@/components/CaseBriefing'
+import InvestigationHub from '@/components/InvestigationHub'
+import LocationScreen from '@/components/LocationScreen'
+import InterviewScreen from '@/components/InterviewScreen'
+import EvidenceBoard from '@/components/EvidenceBoard'
+import AccusationScreen from '@/components/AccusationScreen'
+import CaseClosedScreen from '@/components/CaseClosedScreen'
+import SmokeEffect from '@/components/SmokeEffect'
 
 export default function Home() {
+  const screen = useCaseStore(s => s.screen)
+  const navigate = useCaseStore(s => s.navigate)
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <main style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <SmokeEffect />
+
+      {screen === 'menu'       && <TitleScreen navigate={navigate} />}
+      {screen === 'setup'      && <CaseSetup />}
+      {screen === 'briefing'   && <CaseBriefing />}
+      {screen === 'hub'        && <InvestigationHub />}
+      {screen === 'location'   && <LocationScreen />}
+      {screen === 'interview'  && <InterviewScreen />}
+      {screen === 'evidence'   && <EvidenceBoard />}
+      {screen === 'accusation' && <AccusationScreen />}
+      {screen === 'closed'     && <CaseClosedScreen />}
+    </main>
+  )
+}
+
+function TitleScreen({ navigate }: { navigate: (s: any) => void }) {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 24px',
+      position: 'relative',
+    }}>
+
+      {/* Top rule */}
+      <div style={{
+        width: 120,
+        height: 1,
+        background: 'var(--red)',
+        marginBottom: 32,
+        animation: 'fadeIn 1s ease forwards',
+      }} />
+
+      {/* Eyebrow */}
+      <div style={{
+        fontFamily: 'var(--font-courier)',
+        fontSize: 11,
+        letterSpacing: 6,
+        color: 'var(--cream-dim)',
+        textTransform: 'uppercase',
+        marginBottom: 16,
+        animation: 'fadeIn 1s ease 0.2s both forwards',
+        opacity: 0,
+      }}>
+        Detective Bureau — Case Division
+      </div>
+
+      {/* Title */}
+      <div style={{
+        fontFamily: 'var(--font-playfair)',
+        fontSize: 'clamp(56px, 10vw, 96px)',
+        color: 'var(--cream)',
+        letterSpacing: 8,
+        lineHeight: 1,
+        textAlign: 'center',
+        animation: 'fadeIn 1s ease 0.4s both forwards, flicker 6s 1s infinite',
+        opacity: 0,
+        textShadow: '0 0 40px rgba(139, 26, 26, 0.4)',
+      }}>
+        COLD
+        <br />
+        <span style={{ color: 'var(--red-bright)' }}>CASE</span>
+      </div>
+
+      {/* Subtitle */}
+      <div style={{
+        fontFamily: 'var(--font-special)',
+        fontSize: 13,
+        color: 'var(--cream-dim)',
+        letterSpacing: 3,
+        marginTop: 20,
+        marginBottom: 56,
+        textAlign: 'center',
+        animation: 'fadeIn 1s ease 0.8s both forwards',
+        opacity: 0,
+      }}>
+        Every case has a truth. Find it.
+      </div>
+
+      {/* Buttons */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        width: '100%',
+        maxWidth: 300,
+        animation: 'fadeIn 1s ease 1.2s both forwards',
+        opacity: 0,
+      }}>
+        <TitleButton
+          onClick={() => navigate('setup')}
+          primary
+        >
+          OPEN A NEW CASE
+        </TitleButton>
+
+        <TitleButton onClick={() => navigate('files')}>
+          CASE FILES
+        </TitleButton>
+      </div>
+
+      {/* Bottom rule */}
+      <div style={{
+        position: 'absolute',
+        bottom: 28,
+        fontSize: 10,
+        letterSpacing: 4,
+        color: 'var(--cream-dim)',
+        opacity: 0.3,
+        fontFamily: 'var(--font-courier)',
+        animation: 'fadeIn 1s ease 1.6s both forwards',
+      }}>
+        PROCEDURAL MYSTERY ENGINE
+      </div>
+
     </div>
-  );
+  )
+}
+
+function TitleButton({
+  onClick,
+  children,
+  primary = false,
+}: {
+  onClick: () => void
+  children: React.ReactNode
+  primary?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%',
+        padding: '14px',
+        background: primary ? 'var(--red)' : 'transparent',
+        border: `1px solid ${primary ? 'var(--red-bright)' : 'var(--border-bright)'}`,
+        color: primary ? 'var(--cream)' : 'var(--cream-dim)',
+        fontFamily: 'var(--font-courier)',
+        fontSize: 13,
+        letterSpacing: 4,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        textTransform: 'uppercase',
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget
+        el.style.background = primary ? 'var(--red-bright)' : 'var(--bg-surface)'
+        el.style.color = 'var(--cream)'
+        el.style.borderColor = primary ? 'var(--red-bright)' : 'var(--cream-dim)'
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget
+        el.style.background = primary ? 'var(--red)' : 'transparent'
+        el.style.color = primary ? 'var(--cream)' : 'var(--cream-dim)'
+        el.style.borderColor = primary ? 'var(--red-bright)' : 'var(--border-bright)'
+      }}
+    >
+      {children}
+    </button>
+  )
 }
