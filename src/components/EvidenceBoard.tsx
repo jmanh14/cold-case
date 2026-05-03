@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
 export default function EvidenceBoard() {
@@ -11,13 +11,27 @@ export default function EvidenceBoard() {
   const updateSuspect  = useCaseStore(s => s.updateSuspect)
 
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
-  if (!activeCase || !investigation) return null
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  console.log('EvidenceBoard rendering', { activeCase: !!activeCase, investigation: !!investigation })
+  if (!activeCase || !investigation) return (
+    <div style={{ color: 'white', padding: 32 }}>No Case Loaded</div>
+  )
 
   const discovered = activeCase.evidence.filter(e => e.discovered)
+  console.log('All evidence:', activeCase.evidence.map(e => ({ id: e.id, discovered: e.discovered })))
+  console.log('Discovered:', discovered.length)
   const selected   = discovered.find(e => e.id === selectedEvidence)
 
   const getLocationName = (locationRef: string) => {
+    console.log('locationRef:', locationRef)
+    console.log('available ids:', activeCase.locations.map(l => l.id))
     const byId = activeCase.locations.find(l => l.id === locationRef)
     if (byId) return byId.name 
     const byName = activeCase.locations.find(l =>

@@ -63,6 +63,9 @@ export default function CaseSetup() {
 
       const caseData: Case = await res.json()
 
+      console.log('Locations:', JSON.stringify(caseData.locations.map(l => ({ id: l.id, name: l.name, evidenceIds: l.evidenceIds }))))
+      console.log('Evidence:', JSON.stringify(caseData.evidence.map(e => ({ id: e.id, name: e.name, location: e.location }))))
+
       // fix evidence location IDs — map any mismatched locations to real IDs
       // use location.evidenceIds as source of truth for evidence placement
       caseData.evidence = caseData.evidence.map(evidence => {

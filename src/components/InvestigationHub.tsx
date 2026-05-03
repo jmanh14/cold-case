@@ -16,6 +16,16 @@ export default function InvestigationHub() {
 
   const discoveredEvidence = activeCase.evidence.filter(e => e.discovered)
 
+  const getLocationName = (locationRef: string) => {
+    const byId = activeCase.locations.find(l => l.id === locationRef)
+    if (byId) return byId.name
+    const byName = activeCase.locations.find(l =>
+      l.name.toLowerCase() === locationRef.toLowerCase()
+    )
+    if (byName) return byName.name
+    return locationRef
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -397,7 +407,7 @@ export default function InvestigationHub() {
                       color: 'var(--red-bright)',
                       letterSpacing: 1,
                     }}>
-                      Found: {evidence.location}
+                      Found: {getLocationName(evidence.location)}
                     </div>
                   </div>
                 ))}
