@@ -17,6 +17,16 @@ export default function EvidenceBoard() {
   const discovered = activeCase.evidence.filter(e => e.discovered)
   const selected   = discovered.find(e => e.id === selectedEvidence)
 
+  const getLocationName = (locationRef: string) => {
+    const byId = activeCase.locations.find(l => l.id === locationRef)
+    if (byId) return byId.name 
+    const byName = activeCase.locations.find(l =>
+      l.name.toLowerCase() === locationRef.toLowerCase()
+    )
+    if (byName) return byName.name
+    return locationRef
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -171,7 +181,7 @@ export default function EvidenceBoard() {
                       textTransform: 'uppercase',
                       marginBottom: 8,
                     }}>
-                      {activeCase.locations.find(l => l.id === evidence.location)?.name ?? evidence.location}
+                      {getLocationName(evidence.location)}
                     </div>
 
                     {/* Name */}
@@ -256,7 +266,7 @@ export default function EvidenceBoard() {
               textTransform: 'uppercase',
               marginBottom: 16,
             }}>
-              Found at: {activeCase.locations.find(l => l.id === selected.location)?.name ?? selected.location}
+              Found at: {getLocationName(selected.location)}
             </div>
 
             <div style={{
