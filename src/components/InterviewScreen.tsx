@@ -3,18 +3,71 @@
 import { useState } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
-export default function InterviewScreen() {
-  const navigate         = useCaseStore(s => s.navigate)
-  const activeCase       = useCaseStore(s => s.activeCase)
-  const activeSuspectId  = useCaseStore(s => s.activeSuspectId)
-  const investigation    = useCaseStore(s => s.investigation)
-  const addInterviewEntry = useCaseStore(s => s.addInterviewEntry)
-  const updateSuspect    = useCaseStore(s => s.updateSuspect)
+const QUESTION_BANK = [
+  {
+    category: 'ALIBI',
+    questions: [
+      'Where were you when the crime occurred?',
+      'Can anyone confirm your whereabouts?',
+      'What time did you arrive and leave?',
+      'Did you see or hear anything unusual?',
+    ]
+  },
+  {
+    category: 'RELATIONSHIP',
+    questions: [
+      'How did you know the victim?',
+      'When did you last see them alive?',
+      'How would you describe your relationship?',
+      'Did you two have any recent disputes?',
+    ]
+  },
+  {
+    category: 'MOTIVE',
+    questions: [
+      'Did the victim have any enemies you know of?',
+      'Who do you think could have done this?',
+      'Was anyone angry with the victim recently?',
+      'Did anyone stand to gain from their death?',
+    ]
+  },
+  {
+    category: 'CHARACTER',
+    questions: [
+      'What kind of person was the victim?',
+      'Did the victim have any secrets you knew about?',
+      'How were things between you recently?',
+      "Is there anything you haven't told the police?",
+    ]
+  },
+  {
+    category: 'PRESSURE',
+    questions: [
+      "I think you're not telling me everything.",
+      "Your alibi doesn't add up. Care to explain?",
+      'We found evidence that contradicts your story.',
+      'I\'m going to give you one chance to tell the truth.',
+    ]
+  },
+]
 
-  const [question, setQuestion]   = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState<string | null>(null)
-  const [localLog, setLocalLog]   = useState<{ question: string, response: string, emotion: string }[]>([])
+export default function InterviewScreen() {
+  const navigate          = useCaseStore(s => s.navigate)
+  const activeCase        = useCaseStore(s => s.activeCase)
+  const activeSuspectId   = useCaseStore(s => s.activeSuspectId)
+  const investigation     = useCaseStore(s => s.investigation)
+  const addInterviewEntry = useCaseStore(s => s.addInterviewEntry)
+  const updateSuspect     = useCaseStore(s => s.updateSuspect)
+
+  const [question, setQuestion]           = useState('')
+  const [loading, setLoading]             = useState(false)
+  const [error, setError]                 = useState<string | null>(null)
+  const [activeCategory, setActiveCategory] = useState('ALIBI')
+  const [localLog, setLocalLog]           = useState<{
+    question: string
+    response: string
+    emotion: string
+  }[]>([])
 
   if (!activeCase || !activeSuspectId || !investigation) return null
 
@@ -22,18 +75,18 @@ export default function InterviewScreen() {
 
   const emotionColor = (emotion: string) => {
     switch (emotion) {
-      case 'nervous':    return 'var(--gold)'
-      case 'angry':      return 'var(--red-bright)'
-      case 'defensive':  return 'var(--red-bright)'
-      case 'sad':        return '#7a9fc4'
-      case 'calm':       return 'var(--cream-dim)'
+      case 'nervous':     return '#c9a84c'
+      case 'angry':       return 'var(--red-bright)'
+      case 'defensive':   return 'var(--red-bright)'
+      case 'sad':         return '#7a9fc4'
+      case 'calm':        return 'var(--cream-dim)'
       case 'cooperative': return '#7aad7a'
-      default:           return 'var(--cream-dim)'
+      default:            return 'var(--cream-dim)'
     }
   }
 
-  async function handleAsk() {
-    if (!question.trim() || loading) return
+  async function askQuestion(q: string) {
+    if (loading || !q.trim()) return
     setLoading(true)
     setError(null)
 
@@ -49,7 +102,7 @@ export default function InterviewScreen() {
         body: JSON.stringify({
           activeCase,
           suspectId: activeSuspectId,
-          question: question.trim(),
+          question: q.trim(),
           interviewHistory,
         }),
       })
@@ -58,27 +111,23 @@ export default function InterviewScreen() {
 
       const data = await res.json()
 
-      const entry = {
-        question: question.trim(),
+      setLocalLog(prev => [...prev, {
+        question: q.trim(),
         response: data.response,
         emotion: data.emotion,
-      }
+      }])
 
-      setLocalLog(prev => [...prev, entry])
-
-      // add to global investigation log
       addInterviewEntry({
         suspectId: activeSuspectId ?? '',
         suspectName: suspect.name,
-        question: question.trim(),
+        question: q.trim(),
         response: data.response,
         timestamp: Date.now(),
       })
 
-      // mark suspect as interviewed
       if (activeSuspectId) updateSuspect(activeSuspectId, { interviewed: true })
-
       setQuestion('')
+
     } catch (err) {
       console.error(err)
       setError('Interview failed. Please try again.')
@@ -167,7 +216,7 @@ export default function InterviewScreen() {
         overflow: 'hidden',
       }}>
 
-        {/* Left — interview log */}
+        {/* Left — interview */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -181,7 +230,6 @@ export default function InterviewScreen() {
             padding: '28px 32px',
           }}>
 
-            {/* Empty state */}
             {localLog.length === 0 && (
               <div style={{
                 textAlign: 'center',
@@ -197,7 +245,6 @@ export default function InterviewScreen() {
               </div>
             )}
 
-            {/* Interview exchanges */}
             {localLog.map((entry, i) => (
               <div key={i} style={{ marginBottom: 28 }}>
 
@@ -231,11 +278,7 @@ export default function InterviewScreen() {
                 </div>
 
                 {/* Suspect response */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                  gap: 12,
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <div style={{
                     maxWidth: '75%',
                     padding: '12px 16px',
@@ -276,7 +319,6 @@ export default function InterviewScreen() {
               </div>
             ))}
 
-            {/* Loading */}
             {loading && (
               <div style={{
                 fontFamily: 'var(--font-courier)',
@@ -289,7 +331,6 @@ export default function InterviewScreen() {
               </div>
             )}
 
-            {/* Error */}
             {error && (
               <div style={{
                 color: 'var(--red-bright)',
@@ -302,60 +343,151 @@ export default function InterviewScreen() {
             )}
           </div>
 
-          {/* Fixed question input */}
+          {/* Fixed question footer */}
           <div style={{
             borderTop: '1px solid var(--border-bright)',
-            padding: '16px 32px',
             background: 'var(--bg-surface)',
-            display: 'flex',
-            gap: 12,
           }}>
-            <input
-              type="text"
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAsk()}
-              placeholder="Ask a question..."
-              disabled={loading}
-              style={{
-                flex: 1,
-                background: 'var(--bg-panel)',
-                border: '1px solid var(--border-bright)',
-                color: 'var(--cream)',
-                fontFamily: 'var(--font-courier)',
-                fontSize: 13,
-                padding: '10px 14px',
-                outline: 'none',
-                caretColor: 'var(--red-bright)',
-              }}
-            />
-            <button
-              onClick={handleAsk}
-              disabled={!question.trim() || loading}
-              style={{
-                padding: '10px 24px',
-                background: question.trim() && !loading ? 'var(--red)' : 'transparent',
-                border: `1px solid ${question.trim() && !loading ? 'var(--red-bright)' : 'var(--border)'}`,
-                color: question.trim() && !loading ? 'var(--cream)' : 'var(--cream-dim)',
-                fontFamily: 'var(--font-courier)',
-                fontSize: 11,
-                letterSpacing: 2,
-                cursor: question.trim() && !loading ? 'pointer' : 'not-allowed',
-                textTransform: 'uppercase',
-                transition: 'all 0.15s',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => {
-                if (question.trim() && !loading)
-                  e.currentTarget.style.background = 'var(--red-bright)'
-              }}
-              onMouseLeave={e => {
-                if (question.trim() && !loading)
-                  e.currentTarget.style.background = 'var(--red)'
-              }}
-            >
-              {loading ? 'ASKING...' : 'ASK →'}
-            </button>
+
+            {/* Category tabs */}
+            <div style={{
+              display: 'flex',
+              borderBottom: '1px solid var(--border)',
+              overflowX: 'auto',
+            }}>
+              {QUESTION_BANK.map(cat => (
+                <button
+                  key={cat.category}
+                  onClick={() => setActiveCategory(cat.category)}
+                  style={{
+                    padding: '10px 16px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: `2px solid ${activeCategory === cat.category ? 'var(--red-bright)' : 'transparent'}`,
+                    color: activeCategory === cat.category ? 'var(--cream)' : 'var(--cream-dim)',
+                    fontFamily: 'var(--font-courier)',
+                    fontSize: 10,
+                    letterSpacing: 2,
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s',
+                    flexShrink: 0,
+                  }}
+                >
+                  {cat.category}
+                </button>
+              ))}
+              <button
+                onClick={() => setActiveCategory('CUSTOM')}
+                style={{
+                  padding: '10px 16px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeCategory === 'CUSTOM' ? 'var(--red-bright)' : 'transparent'}`,
+                  color: activeCategory === 'CUSTOM' ? 'var(--cream)' : 'var(--cream-dim)',
+                  fontFamily: 'var(--font-courier)',
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s',
+                  flexShrink: 0,
+                }}
+              >
+                CUSTOM
+              </button>
+            </div>
+
+            {/* Questions or custom input */}
+            <div style={{ padding: '12px 32px 16px' }}>
+              {activeCategory === 'CUSTOM' ? (
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <input
+                    type="text"
+                    value={question}
+                    onChange={e => setQuestion(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && askQuestion(question)}
+                    placeholder="Type your own question..."
+                    disabled={loading}
+                    style={{
+                      flex: 1,
+                      background: 'var(--bg-panel)',
+                      border: '1px solid var(--border-bright)',
+                      color: 'var(--cream)',
+                      fontFamily: 'var(--font-courier)',
+                      fontSize: 13,
+                      padding: '10px 14px',
+                      outline: 'none',
+                      caretColor: 'var(--red-bright)',
+                    }}
+                  />
+                  <button
+                    onClick={() => askQuestion(question)}
+                    disabled={!question.trim() || loading}
+                    style={{
+                      padding: '10px 24px',
+                      background: question.trim() && !loading ? 'var(--red)' : 'transparent',
+                      border: `1px solid ${question.trim() && !loading ? 'var(--red-bright)' : 'var(--border)'}`,
+                      color: question.trim() && !loading ? 'var(--cream)' : 'var(--cream-dim)',
+                      fontFamily: 'var(--font-courier)',
+                      fontSize: 11,
+                      letterSpacing: 2,
+                      cursor: question.trim() && !loading ? 'pointer' : 'not-allowed',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onMouseEnter={e => {
+                      if (question.trim() && !loading)
+                        e.currentTarget.style.background = 'var(--red-bright)'
+                    }}
+                    onMouseLeave={e => {
+                      if (question.trim() && !loading)
+                        e.currentTarget.style.background = 'var(--red)'
+                    }}
+                  >
+                    {loading ? 'ASKING...' : 'ASK →'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {QUESTION_BANK.find(c => c.category === activeCategory)?.questions.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => askQuestion(q)}
+                      disabled={loading}
+                      style={{
+                        padding: '8px 14px',
+                        background: 'var(--bg-panel)',
+                        border: '1px solid var(--border-bright)',
+                        color: 'var(--cream-dim)',
+                        fontFamily: 'var(--font-courier)',
+                        fontSize: 12,
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.15s',
+                        textAlign: 'left',
+                        lineHeight: 1.5,
+                        opacity: loading ? 0.5 : 1,
+                      }}
+                      onMouseEnter={e => {
+                        if (!loading) {
+                          e.currentTarget.style.borderColor = 'var(--red-bright)'
+                          e.currentTarget.style.color = 'var(--cream)'
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'var(--border-bright)'
+                        e.currentTarget.style.color = 'var(--cream-dim)'
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
