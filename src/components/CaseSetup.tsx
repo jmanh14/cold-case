@@ -63,6 +63,29 @@ export default function CaseSetup() {
 
       const caseData: Case = await res.json()
 
+      // fix evidence location IDs — map any mismatched locations to real IDs
+      caseData.evidence = caseData.evidence.map(evidence => {
+        // check if location already matches a real ID
+        const exactMatch = caseData.locations.find(l => l.id === evidence.location)
+        if (exactMatch) return evidence
+
+        // try to match by name
+        const nameMatch = caseData.locations.find(l =>
+          l.name.toLowerCase().includes(evidence.location.toLowerCase()) ||
+          evidence.location.toLowerCase().includes(l.name.toLowerCase())
+        )
+        if (nameMatch) return { ...evidence, location: nameMatch.id }
+
+        // try to match by evidence being in location's evidenceIds
+        const containsMatch = caseData.locations.find(l =>
+          l.evidenceIds.includes(evidence.id)
+        )
+        if (containsMatch) return { ...evidence, location: containsMatch.id }
+
+        // fallback — assign to first location
+        return { ...evidence, location: caseData.locations[0]?.id ?? evidence.location }
+      })
+
       // assign voices to suspects from pool
       const VOICE_POOL = [
         'pNInz6obpgDQGcFmaJgB', // Adam
