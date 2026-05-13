@@ -20,6 +20,9 @@ type CaseStore = {
   activeLocationId: string | null
   setActiveLocation: (id: string) => void
 
+  snippets: string[]
+  setSnippets: (snippets: string[]) => void
+
   updateSuspect: (id: string, updates: Partial<Suspect>) => void
   updateEvidence: (id: string, updates: Partial<Evidence>) => void
   addInterviewEntry: (entry: InvestigationState['interviewLog'][0]) => void
@@ -48,6 +51,9 @@ export const useCaseStore = create<CaseStore>((set) => ({
 
   activeLocationId: null,
   setActiveLocation: (id) => set({ activeLocationId: id }),
+
+  snippets: [],
+  setSnippets: (snippets) => set({ snippets }),
 
   updateSuspect: (id, updates) => set((state) => {
     if (!state.activeCase) return state
@@ -125,6 +131,8 @@ export const useCaseStore = create<CaseStore>((set) => ({
     investigation: null,
     activeSuspectId: null,
     activeLocationId: null,
+    snippets: [],
+    closedCaseResult: null,
     screen: 'menu',
   }),
 }))

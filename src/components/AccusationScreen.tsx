@@ -1,23 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
 export default function AccusationScreen() {
-  const navigate      = useCaseStore(s => s.navigate)
-  const activeCase    = useCaseStore(s => s.activeCase)
-  const investigation = useCaseStore(s => s.investigation)
+  const navigate         = useCaseStore(s => s.navigate)
+  const activeCase       = useCaseStore(s => s.activeCase)
+  const investigation    = useCaseStore(s => s.investigation)
   const setInvestigation = useCaseStore(s => s.setInvestigation)
+  const snippets         = useCaseStore(s => s.snippets)
+  const setSnippets      = useCaseStore(s => s.setSnippets)
 
-  const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
-  const [reasoning, setReasoning]             = useState('')
-  const [loading, setLoading]                 = useState(false)
-  const [error, setError]                     = useState<string | null>(null)
+  const [selectedSuspect, setSelectedSuspect]     = useState<string | null>(null)
+  const [selectedSnippets, setSelectedSnippets]   = useState<string[]>([])
+  const [customReasoning, setCustomReasoning]     = useState('')
+  const [loading, setLoading]                     = useState(false)
+  const [snippetsLoading, setSnippetsLoading]     = useState(false)
+  const [error, setError]                         = useState<string | null>(null)
 
   if (!activeCase || !investigation) return null
 
   const discoveredEvidence = activeCase.evidence.filter(e => e.discovered)
-  const ready = selectedSuspect && reasoning.trim().length > 20
+  const combinedReasoning  = [
+    ...selectedSnippets,
+    customReasoning.trim(),
+  ].filter(Boolean).join(' ')
+
+  const ready = selectedSuspect && combinedReasoning.length > 20
+
+  // generate snippets when screen loads
+  useEffect(() => {
+    if (snippets.length > 0) return // already have them
+    generateSnippets()
+  }, [])
+
+  async function generateSnippets() {
+    setSnippetsLoading(true)
+    try {
+      const res = await fetch('/api/generate-snippets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activeCase, investigation }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      setSnippets(data.snippets ?? [])
+    } catch {
+      // silently fail — player can still type their own
+    } finally {
+      setSnippetsLoading(false)
+    }
+  }
+
+  function toggleSnippet(snippet: string) {
+    setSelectedSnippets(prev =>
+      prev.includes(snippet)
+        ? prev.filter(s => s !== snippet)
+        : [...prev, snippet]
+    )
+  }
 
   async function handleAccuse() {
     if (!ready || loading || !selectedSuspect || !investigation) return
@@ -31,7 +72,7 @@ export default function AccusationScreen() {
         body: JSON.stringify({
           activeCase,
           accusedSuspectId: selectedSuspect,
-          playerReasoning: reasoning,
+          playerReasoning: combinedReasoning,
         }),
       })
 
@@ -39,7 +80,7 @@ export default function AccusationScreen() {
 
       const data = await res.json()
 
-        setInvestigation({
+      setInvestigation({
         caseId: investigation.caseId ?? '',
         currentLocation: investigation.currentLocation,
         visitedLocations: investigation.visitedLocations,
@@ -51,12 +92,9 @@ export default function AccusationScreen() {
         turnsUsed: investigation.turnsUsed,
       })
 
-      // store result in case for closed screen
-      useCaseStore.setState({
-        closedCaseResult: data,
-      })
-
+      useCaseStore.setState({ closedCaseResult: data })
       navigate('closed')
+
     } catch (err) {
       console.error(err)
       setError('Failed to process accusation. Please try again.')
@@ -133,7 +171,6 @@ export default function AccusationScreen() {
         flex: 1,
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: 0,
         overflow: 'hidden',
         height: 'calc(100vh - 89px)',
       }}>
@@ -222,7 +259,7 @@ export default function AccusationScreen() {
           </div>
         </div>
 
-        {/* Right — reasoning + evidence summary */}
+        {/* Right — snippets + reasoning */}
         <div style={{
           padding: '32px',
           overflowY: 'auto',
@@ -231,7 +268,7 @@ export default function AccusationScreen() {
           gap: 24,
         }}>
 
-          {/* Evidence summary */}
+          {/* Investigation snippets */}
           <div>
             <div style={{
               fontFamily: 'var(--font-courier)',
@@ -241,72 +278,97 @@ export default function AccusationScreen() {
               textTransform: 'uppercase',
               marginBottom: 12,
             }}>
-              Evidence Collected ({discoveredEvidence.length})
+              Case Observations — Select to Include
             </div>
-            {discoveredEvidence.length === 0 ? (
+
+            {snippetsLoading ? (
+              <div style={{
+                fontFamily: 'var(--font-courier)',
+                fontSize: 12,
+                color: 'var(--cream-dim)',
+                fontStyle: 'italic',
+                letterSpacing: 1,
+              }}>
+                Analyzing your investigation...
+              </div>
+            ) : snippets.length === 0 ? (
               <div style={{
                 fontFamily: 'var(--font-courier)',
                 fontSize: 12,
                 color: 'var(--cream-dim)',
                 fontStyle: 'italic',
               }}>
-                No evidence collected. Are you sure you want to accuse?
+                No observations available — conduct more interviews and collect evidence.
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {discoveredEvidence.map(e => (
-                  <div key={e.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    fontFamily: 'var(--font-courier)',
-                    fontSize: 12,
-                    color: e.playerTag === 'relevant' ? 'var(--cream)'
-                      : e.playerTag === 'red_herring' ? 'var(--cream-dim)'
-                      : 'var(--cream-dim)',
-                  }}>
-                    <div style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: e.playerTag === 'relevant' ? 'var(--red-bright)'
-                        : e.playerTag === 'red_herring' ? 'var(--border-bright)'
-                        : 'var(--border-bright)',
-                      flexShrink: 0,
-                    }} />
-                    {e.name}
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {snippets.map((snippet, i) => {
+                  const isSelected = selectedSnippets.includes(snippet)
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => toggleSnippet(snippet)}
+                      style={{
+                        padding: '10px 14px',
+                        background: isSelected ? 'rgba(139,26,26,0.3)' : 'var(--bg-surface)',
+                        border: `1px solid ${isSelected ? 'var(--red-bright)' : 'var(--border)'}`,
+                        color: isSelected ? 'var(--cream)' : 'var(--cream-dim)',
+                        fontFamily: 'var(--font-courier)',
+                        fontSize: 12,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        lineHeight: 1.7,
+                        transition: 'all 0.15s',
+                        display: 'flex',
+                        gap: 10,
+                        alignItems: 'flex-start',
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'var(--red-bright)'
+                          e.currentTarget.style.color = 'var(--cream)'
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'var(--border)'
+                          e.currentTarget.style.color = 'var(--cream-dim)'
+                        }
+                      }}
+                    >
+                      <span style={{
+                        color: isSelected ? 'var(--red-bright)' : 'var(--border-bright)',
+                        flexShrink: 0,
+                        fontSize: 14,
+                        marginTop: 1,
+                      }}>
+                        {isSelected ? '✓' : '○'}
+                      </span>
+                      {snippet}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
 
-          {/* Reasoning */}
-          <div style={{ flex: 1 }}>
+          {/* Custom reasoning */}
+          <div>
             <div style={{
               fontFamily: 'var(--font-courier)',
               fontSize: 10,
               letterSpacing: 4,
               color: 'var(--red-bright)',
               textTransform: 'uppercase',
-              marginBottom: 12,
+              marginBottom: 8,
             }}>
-              Your Reasoning
-            </div>
-            <div style={{
-              fontFamily: 'var(--font-courier)',
-              fontSize: 11,
-              color: 'var(--cream-dim)',
-              marginBottom: 10,
-              lineHeight: 1.6,
-            }}>
-              Explain why you believe this suspect is guilty. What evidence points to them? What was their motive?
+              Additional Reasoning (Optional)
             </div>
             <textarea
-              value={reasoning}
-              onChange={e => setReasoning(e.target.value)}
-              placeholder="State your case, detective..."
-              rows={8}
+              value={customReasoning}
+              onChange={e => setCustomReasoning(e.target.value)}
+              placeholder="Add anything else you've noticed..."
+              rows={4}
               style={{
                 width: '100%',
                 background: 'var(--bg-surface)',
@@ -314,24 +376,25 @@ export default function AccusationScreen() {
                 color: 'var(--cream)',
                 fontFamily: 'var(--font-courier)',
                 fontSize: 13,
-                padding: '14px 16px',
+                padding: '12px 14px',
                 resize: 'none',
                 outline: 'none',
                 lineHeight: 1.8,
                 caretColor: 'var(--red-bright)',
               }}
             />
-            <div style={{
-              fontFamily: 'var(--font-courier)',
-              fontSize: 10,
-              color: reasoning.trim().length < 20 ? 'var(--red-bright)' : 'var(--cream-dim)',
-              marginTop: 6,
-              letterSpacing: 1,
-            }}>
-              {reasoning.trim().length < 20
-                ? `${20 - reasoning.trim().length} more characters needed`
-                : '✓ Ready to accuse'}
-            </div>
+          </div>
+
+          {/* Ready indicator */}
+          <div style={{
+            fontFamily: 'var(--font-courier)',
+            fontSize: 10,
+            color: ready ? 'var(--cream-dim)' : 'var(--red-bright)',
+            letterSpacing: 1,
+          }}>
+            {!selectedSuspect ? '— Select a suspect to accuse'
+              : combinedReasoning.length < 20 ? '— Select observations or add reasoning'
+              : '✓ Ready to make your accusation'}
           </div>
 
           {/* Error */}
