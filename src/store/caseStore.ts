@@ -25,6 +25,7 @@ type CaseStore = {
   addInterviewEntry: (entry: InvestigationState['interviewLog'][0]) => void
   discoverEvidence: (id: string) => void
   markLocationVisited: (id: string) => void
+  closedCaseResult: any | null
 
   resetCase: () => void
 }
@@ -116,6 +117,8 @@ export const useCaseStore = create<CaseStore>((set) => ({
       } : null
     }
   }),
+
+  closedCaseResult: null,
 
   resetCase: () => set({
     activeCase: null,
