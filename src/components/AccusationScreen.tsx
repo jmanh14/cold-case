@@ -20,7 +20,7 @@ export default function AccusationScreen() {
   const ready = selectedSuspect && reasoning.trim().length > 20
 
   async function handleAccuse() {
-    if (!ready || loading || !selectedSuspect) return
+    if (!ready || loading || !selectedSuspect || !investigation) return
     setLoading(true)
     setError(null)
 
