@@ -93,3 +93,30 @@ body::before {
 .anim-6 {
   animation: fadeIn 1s ease 1.6s both;
 }
+
+/* Paper document styles */
+.doc-text {
+  color: #1a1209;
+  font-family: var(--font-courier);
+}
+
+.doc-heading {
+  color: #1a1209;
+  font-family: var(--font-playfair);
+}
+
+.doc-label {
+  color: #8b1a1a;
+  font-family: var(--font-courier);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.doc-dim {
+  color: #5a4a3a;
+}
+
+.doc-border {
+  border-color: rgba(0,0,0,0.15);
+}

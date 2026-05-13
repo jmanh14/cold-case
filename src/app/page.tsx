@@ -11,6 +11,7 @@ import EvidenceBoard from '@/components/EvidenceBoard'
 import AccusationScreen from '@/components/AccusationScreen'
 import CaseClosedScreen from '@/components/CaseClosedScreen'
 import SmokeEffect from '@/components/SmokeEffect'
+import DeskLayout from '@/components/DeskLayout'
 
 export default function Home() {
   const screen = useCaseStore(s => s.screen)
@@ -22,13 +23,19 @@ export default function Home() {
 
       {screen === 'menu'       && <TitleScreen navigate={navigate} />}
       {screen === 'setup'      && <CaseSetup />}
-      {screen === 'briefing'   && <CaseBriefing />}
-      {screen === 'hub'        && <InvestigationHub />}
-      {screen === 'location'   && <LocationScreen />}
-      {screen === 'interview'  && <InterviewScreen />}
-      {screen === 'evidence'   && <EvidenceBoard />}
-      {screen === 'accusation' && <AccusationScreen />}
-      {screen === 'closed'     && <CaseClosedScreen />}
+
+      {['briefing', 'hub', 'location', 'interview', 'evidence', 'accusation', 'closed'].includes(screen) && (
+        <DeskLayout currentScreen={screen}>
+          {screen === 'briefing'   && <CaseBriefing />}
+          {screen === 'hub'        && <InvestigationHub />}
+          {screen === 'location'   && <LocationScreen />}
+          {screen === 'interview'  && <InterviewScreen />}
+          {screen === 'evidence'   && <EvidenceBoard />}
+          {screen === 'accusation' && <AccusationScreen />}
+          {screen === 'closed'     && <CaseClosedScreen />}
+        </DeskLayout>
+      )}
+
     </main>
   )
 }
