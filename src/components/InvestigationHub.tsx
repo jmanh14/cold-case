@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
 export default function InvestigationHub() {
-  const navigate        = useCaseStore(s => s.navigate)
-  const activeCase      = useCaseStore(s => s.activeCase)
-  const investigation   = useCaseStore(s => s.investigation)
+  const navigate          = useCaseStore(s => s.navigate)
+  const activeCase        = useCaseStore(s => s.activeCase)
+  const investigation     = useCaseStore(s => s.investigation)
   const setActiveLocation = useCaseStore(s => s.setActiveLocation)
   const setActiveSuspect  = useCaseStore(s => s.setActiveSuspect)
 
@@ -27,83 +27,73 @@ export default function InvestigationHub() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      zIndex: 1,
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-      {/* Header */}
+      {/* Stats row */}
       <div style={{
-        borderBottom: '1px solid var(--border-bright)',
-        padding: '20px 32px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'var(--bg-surface)',
+        marginBottom: 16,
+        paddingBottom: 12,
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
       }}>
-        <div>
-          <div style={{
+        <div style={{ display: 'flex', gap: 20 }}>
+          <MiniStat label="Turns" value={investigation.turnsUsed} />
+          <MiniStat label="Evidence" value={`${discoveredEvidence.length}/${activeCase.evidence.length}`} />
+          <MiniStat label="Locations" value={`${investigation.visitedLocations.length}/${activeCase.locations.length}`} />
+        </div>
+        <button
+          onClick={() => navigate('accusation')}
+          style={{
+            padding: '8px 20px',
+            background: '#8b1a1a',
+            border: '1px solid #8b1a1a',
+            color: '#f0e6c8',
             fontFamily: 'var(--font-courier)',
             fontSize: 10,
-            letterSpacing: 4,
-            color: 'var(--red-bright)',
+            letterSpacing: 2,
+            cursor: 'pointer',
             textTransform: 'uppercase',
-            marginBottom: 4,
-          }}>
-            Active Investigation
-          </div>
-          <div style={{
-            fontFamily: 'var(--font-playfair)',
-            fontSize: 22,
-            color: 'var(--cream)',
-          }}>
-            {activeCase.title}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: 20, marginRight: 8 }}>
-            <MiniStat label="Turns" value={investigation.turnsUsed} />
-            <MiniStat label="Evidence" value={`${discoveredEvidence.length}/${activeCase.evidence.length}`} />
-            <MiniStat label="Locations" value={`${investigation.visitedLocations.length}/${activeCase.locations.length}`} />
-          </div>
-
-          {/* Action buttons */}
-          <HubButton onClick={() => navigate('evidence')}>
-            Evidence Board
-          </HubButton>
-          <HubButton onClick={() => navigate('accusation')} primary>
-            Make Accusation
-          </HubButton>
-        </div>
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#6b1212'}
+          onMouseLeave={e => e.currentTarget.style.background = '#8b1a1a'}
+        >
+          Make Accusation →
+        </button>
       </div>
 
       {/* Tabs */}
       <div style={{
         display: 'flex',
-        borderBottom: '1px solid var(--border)',
-        background: 'var(--bg-surface)',
+        gap: 0,
+        borderBottom: '1px solid rgba(0,0,0,0.15)',
+        marginBottom: 16,
       }}>
         {(['locations', 'suspects', 'evidence'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              padding: '12px 28px',
+              padding: '6px 20px',
               background: 'transparent',
               border: 'none',
-              borderBottom: `2px solid ${activeTab === tab ? 'var(--red-bright)' : 'transparent'}`,
-              color: activeTab === tab ? 'var(--cream)' : 'var(--cream-dim)',
+              borderBottom: `2px solid ${activeTab === tab ? '#8b1a1a' : 'transparent'}`,
+              color: activeTab === tab ? '#8b1a1a' : '#5a4a3a',
               fontFamily: 'var(--font-courier)',
-              fontSize: 11,
+              fontSize: 10,
               letterSpacing: 3,
               cursor: 'pointer',
               textTransform: 'uppercase',
               transition: 'all 0.15s',
+              marginBottom: -1,
+            }}
+            onMouseEnter={e => {
+              if (activeTab !== tab) e.currentTarget.style.color = '#1a1209'
+            }}
+            onMouseLeave={e => {
+              if (activeTab !== tab) e.currentTarget.style.color = '#5a4a3a'
             }}
           >
             {tab}
@@ -112,25 +102,21 @@ export default function InvestigationHub() {
       </div>
 
       {/* Content */}
-      <div style={{
-        flex: 1,
-        padding: '32px',
-        overflowY: 'auto',
-      }}>
+      <div style={{ flex: 1, overflowY: 'auto' }} className="doc-scroll">
 
-        {/* LOCATIONS TAB */}
+        {/* LOCATIONS */}
         {activeTab === 'locations' && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 16,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: 12,
           }}>
             {activeCase.locations.map(location => {
               const visited = investigation.visitedLocations.includes(location.id)
               const evidenceHere = activeCase.evidence.filter(
                 e => e.location === location.id && e.discovered
               ).length
-              const totalEvidenceHere = activeCase.evidence.filter(
+              const totalHere = activeCase.evidence.filter(
                 e => e.location === location.id
               ).length
 
@@ -142,69 +128,66 @@ export default function InvestigationHub() {
                     navigate('location')
                   }}
                   style={{
-                    background: 'var(--bg-surface)',
-                    border: `1px solid ${visited ? 'var(--border-bright)' : 'var(--border)'}`,
-                    padding: '20px',
+                    background: visited ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)',
+                    border: `1px solid ${visited ? 'rgba(139,26,26,0.3)' : 'rgba(0,0,0,0.12)'}`,
+                    padding: '14px',
                     textAlign: 'left',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'all 0.15s',
                     position: 'relative',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = 'var(--red-bright)'
-                    e.currentTarget.style.background = 'var(--bg-panel)'
+                    e.currentTarget.style.background = 'rgba(0,0,0,0.07)'
+                    e.currentTarget.style.borderColor = 'rgba(139,26,26,0.4)'
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = visited ? 'var(--border-bright)' : 'var(--border)'
-                    e.currentTarget.style.background = 'var(--bg-surface)'
+                    e.currentTarget.style.background = visited ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)'
+                    e.currentTarget.style.borderColor = visited ? 'rgba(139,26,26,0.3)' : 'rgba(0,0,0,0.12)'
                   }}
                 >
-                  {/* Visited badge */}
                   {visited && (
                     <div style={{
                       position: 'absolute',
-                      top: 12,
-                      right: 12,
+                      top: 8,
+                      right: 10,
                       fontFamily: 'var(--font-courier)',
-                      fontSize: 9,
+                      fontSize: 8,
                       letterSpacing: 2,
-                      color: 'var(--red-bright)',
+                      color: '#8b1a1a',
                       textTransform: 'uppercase',
                     }}>
                       Searched
                     </div>
                   )}
-
                   <div style={{
                     fontFamily: 'var(--font-playfair)',
-                    fontSize: 20,
-                    color: 'var(--cream)',
-                    marginBottom: 8,
+                    fontSize: 16,
+                    color: '#1a1209',
+                    marginBottom: 6,
                   }}>
                     {location.name}
                   </div>
                   <div style={{
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 12,
-                    color: 'var(--cream-dim)',
-                    lineHeight: 1.7,
-                    marginBottom: 16,
+                    fontSize: 11,
+                    color: '#5a4a3a',
+                    lineHeight: 1.6,
+                    marginBottom: 10,
                   }}>
                     {location.description}
                   </div>
-
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 11,
-                    color: 'var(--cream-dim)',
+                    fontSize: 10,
+                    color: '#5a4a3a',
                   }}>
                     <span>
                       {activeCase.suspects.filter(s => location.suspectIds.includes(s.id)).length} suspects
                     </span>
-                    <span style={{ color: evidenceHere > 0 ? 'var(--red-bright)' : 'var(--cream-dim)' }}>
-                      {evidenceHere}/{totalEvidenceHere} evidence
+                    <span style={{ color: evidenceHere > 0 ? '#8b1a1a' : '#5a4a3a' }}>
+                      {evidenceHere}/{totalHere} evidence
                     </span>
                   </div>
                 </button>
@@ -213,12 +196,12 @@ export default function InvestigationHub() {
           </div>
         )}
 
-        {/* SUSPECTS TAB */}
+        {/* SUSPECTS */}
         {activeTab === 'suspects' && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 16,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: 12,
           }}>
             {activeCase.suspects.map(suspect => (
               <button
@@ -228,54 +211,52 @@ export default function InvestigationHub() {
                   navigate('interview')
                 }}
                 style={{
-                  background: 'var(--bg-surface)',
-                  border: `1px solid ${suspect.interviewed ? 'var(--border-bright)' : 'var(--border)'}`,
-                  padding: '20px',
+                  background: suspect.interviewed ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)',
+                  border: `1px solid ${suspect.interviewed ? 'rgba(139,26,26,0.3)' : 'rgba(0,0,0,0.12)'}`,
+                  padding: '14px',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.15s',
                   position: 'relative',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'var(--red-bright)'
-                  e.currentTarget.style.background = 'var(--bg-panel)'
+                  e.currentTarget.style.background = 'rgba(0,0,0,0.07)'
+                  e.currentTarget.style.borderColor = 'rgba(139,26,26,0.4)'
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = suspect.interviewed ? 'var(--border-bright)' : 'var(--border)'
-                  e.currentTarget.style.background = 'var(--bg-surface)'
+                  e.currentTarget.style.background = suspect.interviewed ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.02)'
+                  e.currentTarget.style.borderColor = suspect.interviewed ? 'rgba(139,26,26,0.3)' : 'rgba(0,0,0,0.12)'
                 }}
               >
-                {/* Interview badge */}
                 {suspect.interviewed && (
                   <div style={{
                     position: 'absolute',
-                    top: 12,
-                    right: 12,
+                    top: 8,
+                    right: 10,
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 9,
+                    fontSize: 8,
                     letterSpacing: 2,
-                    color: 'var(--red-bright)',
+                    color: '#8b1a1a',
                     textTransform: 'uppercase',
                   }}>
                     Interviewed
                   </div>
                 )}
 
-                {/* Player tag */}
                 {suspect.playerTag !== 'none' && (
                   <div style={{
                     display: 'inline-block',
                     padding: '2px 8px',
-                    marginBottom: 10,
+                    marginBottom: 8,
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 9,
+                    fontSize: 8,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
-                    background: suspect.playerTag === 'prime_suspect' ? 'var(--red)'
-                      : suspect.playerTag === 'suspicious' ? 'var(--red-dim)'
-                      : 'var(--bg-panel)',
-                    color: suspect.playerTag === 'innocent' ? 'var(--cream-dim)' : 'var(--cream)',
-                    border: '1px solid var(--border)',
+                    background: suspect.playerTag === 'prime_suspect'
+                      ? 'rgba(139,26,26,0.15)'
+                      : 'rgba(0,0,0,0.06)',
+                    color: suspect.playerTag === 'prime_suspect' ? '#8b1a1a' : '#5a4a3a',
+                    border: '1px solid rgba(0,0,0,0.1)',
                   }}>
                     {suspect.playerTag === 'prime_suspect' ? 'Prime Suspect'
                       : suspect.playerTag === 'suspicious' ? 'Suspicious'
@@ -285,34 +266,34 @@ export default function InvestigationHub() {
 
                 <div style={{
                   fontFamily: 'var(--font-playfair)',
-                  fontSize: 22,
-                  color: 'var(--cream)',
+                  fontSize: 18,
+                  color: '#1a1209',
                   marginBottom: 4,
                 }}>
                   {suspect.name}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-courier)',
-                  fontSize: 12,
-                  color: 'var(--red-bright)',
-                  marginBottom: 10,
+                  fontSize: 10,
+                  color: '#8b1a1a',
+                  marginBottom: 6,
                   letterSpacing: 1,
                 }}>
                   {suspect.age} — {suspect.occupation}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-courier)',
-                  fontSize: 12,
-                  color: 'var(--cream-dim)',
-                  marginBottom: 12,
+                  fontSize: 11,
+                  color: '#5a4a3a',
                   lineHeight: 1.6,
+                  marginBottom: 8,
                 }}>
                   {suspect.relationship}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-courier)',
-                  fontSize: 11,
-                  color: 'var(--cream-dim)',
+                  fontSize: 10,
+                  color: '#5a4a3a',
                   fontStyle: 'italic',
                 }}>
                   "{suspect.personality}"
@@ -320,17 +301,17 @@ export default function InvestigationHub() {
 
                 {suspect.playerNote && (
                   <div style={{
-                    marginTop: 12,
-                    padding: '8px 10px',
-                    background: 'var(--bg-panel)',
-                    border: '1px solid var(--border)',
+                    marginTop: 10,
+                    padding: '6px 8px',
+                    background: 'rgba(0,0,0,0.04)',
+                    border: '1px solid rgba(0,0,0,0.08)',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 11,
-                    color: 'var(--cream-dim)',
-                    lineHeight: 1.6,
+                    fontSize: 10,
+                    color: '#5a4a3a',
                     fontStyle: 'italic',
+                    lineHeight: 1.5,
                   }}>
-                    Note: {suspect.playerNote}
+                    {suspect.playerNote}
                   </div>
                 )}
               </button>
@@ -338,76 +319,77 @@ export default function InvestigationHub() {
           </div>
         )}
 
-        {/* EVIDENCE TAB */}
+        {/* EVIDENCE */}
         {activeTab === 'evidence' && (
           <div>
             {discoveredEvidence.length === 0 ? (
               <div style={{
                 textAlign: 'center',
-                padding: '60px 0',
+                padding: '40px 0',
                 fontFamily: 'var(--font-courier)',
-                fontSize: 13,
-                color: 'var(--cream-dim)',
-                letterSpacing: 2,
+                fontSize: 12,
+                color: '#5a4a3a',
+                fontStyle: 'italic',
               }}>
                 No evidence discovered yet. Search locations to find clues.
               </div>
             ) : (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: 16,
+                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                gap: 12,
               }}>
                 {discoveredEvidence.map(evidence => (
                   <div
                     key={evidence.id}
                     style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-bright)',
-                      padding: '20px',
+                      background: 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.12)',
+                      padding: '14px',
                     }}
                   >
                     {evidence.playerTag !== 'none' && (
                       <div style={{
                         display: 'inline-block',
                         padding: '2px 8px',
-                        marginBottom: 10,
+                        marginBottom: 8,
                         fontFamily: 'var(--font-courier)',
-                        fontSize: 9,
+                        fontSize: 8,
                         letterSpacing: 2,
                         textTransform: 'uppercase',
-                        background: evidence.playerTag === 'relevant' ? 'var(--red-dim)' : 'var(--bg-panel)',
-                        color: 'var(--cream-dim)',
-                        border: '1px solid var(--border)',
+                        background: evidence.playerTag === 'relevant'
+                          ? 'rgba(139,26,26,0.15)' : 'rgba(0,0,0,0.06)',
+                        color: evidence.playerTag === 'relevant' ? '#8b1a1a' : '#5a4a3a',
+                        border: '1px solid rgba(0,0,0,0.1)',
                       }}>
                         {evidence.playerTag === 'relevant' ? 'Relevant' : 'Red Herring'}
                       </div>
                     )}
-
                     <div style={{
                       fontFamily: 'var(--font-playfair)',
-                      fontSize: 18,
-                      color: 'var(--cream)',
-                      marginBottom: 8,
+                      fontSize: 15,
+                      color: '#1a1209',
+                      marginBottom: 6,
                     }}>
                       {evidence.name}
                     </div>
                     <div style={{
                       fontFamily: 'var(--font-courier)',
-                      fontSize: 12,
-                      color: 'var(--cream-dim)',
-                      lineHeight: 1.7,
-                      marginBottom: 10,
+                      fontSize: 11,
+                      color: '#5a4a3a',
+                      lineHeight: 1.6,
+                      marginBottom: 8,
                     }}>
                       {evidence.description}
                     </div>
                     <div style={{
                       fontFamily: 'var(--font-courier)',
-                      fontSize: 11,
-                      color: 'var(--red-bright)',
+                      fontSize: 9,
+                      color: '#8b1a1a',
                       letterSpacing: 1,
+                      textTransform: 'uppercase',
                     }}>
-                      Found: {getLocationName(evidence.location)}
+                      {getLocationName(evidence.location)}
                     </div>
                   </div>
                 ))}
@@ -426,55 +408,21 @@ function MiniStat({ label, value }: { label: string, value: string | number }) {
       <div style={{
         fontFamily: 'var(--font-playfair)',
         fontSize: 20,
-        color: 'var(--cream)',
+        color: '#1a1209',
         lineHeight: 1,
       }}>
         {value}
       </div>
       <div style={{
         fontFamily: 'var(--font-courier)',
-        fontSize: 9,
+        fontSize: 8,
         letterSpacing: 2,
-        color: 'var(--cream-dim)',
+        color: '#5a4a3a',
         textTransform: 'uppercase',
         marginTop: 2,
       }}>
         {label}
       </div>
     </div>
-  )
-}
-
-function HubButton({ onClick, children, primary = false }: {
-  onClick: () => void
-  children: React.ReactNode
-  primary?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '8px 20px',
-        background: primary ? 'var(--red)' : 'transparent',
-        border: `1px solid ${primary ? 'var(--red-bright)' : 'var(--border-bright)'}`,
-        color: primary ? 'var(--cream)' : 'var(--cream-dim)',
-        fontFamily: 'var(--font-courier)',
-        fontSize: 11,
-        letterSpacing: 2,
-        cursor: 'pointer',
-        textTransform: 'uppercase',
-        transition: 'all 0.15s',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = primary ? 'var(--red-bright)' : 'var(--bg-panel)'
-        e.currentTarget.style.color = 'var(--cream)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = primary ? 'var(--red)' : 'transparent'
-        e.currentTarget.style.color = primary ? 'var(--cream)' : 'var(--cream-dim)'
-      }}
-    >
-      {children}
-    </button>
   )
 }
