@@ -46,7 +46,7 @@ const QUESTION_BANK = [
       "I think you're not telling me everything.",
       "Your alibi doesn't add up. Care to explain?",
       'We found evidence that contradicts your story.',
-      'I\'m going to give you one chance to tell the truth.',
+      "I'm going to give you one chance to tell the truth.",
     ]
   },
 ]
@@ -59,11 +59,11 @@ export default function InterviewScreen() {
   const addInterviewEntry = useCaseStore(s => s.addInterviewEntry)
   const updateSuspect     = useCaseStore(s => s.updateSuspect)
 
-  const [question, setQuestion]           = useState('')
-  const [loading, setLoading]             = useState(false)
-  const [error, setError]                 = useState<string | null>(null)
+  const [question, setQuestion]             = useState('')
+  const [loading, setLoading]               = useState(false)
+  const [error, setError]                   = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState('ALIBI')
-  const [localLog, setLocalLog]           = useState<{
+  const [localLog, setLocalLog]             = useState<{
     question: string
     response: string
     emotion: string
@@ -75,13 +75,13 @@ export default function InterviewScreen() {
 
   const emotionColor = (emotion: string) => {
     switch (emotion) {
-      case 'nervous':     return '#c9a84c'
-      case 'angry':       return 'var(--red-bright)'
-      case 'defensive':   return 'var(--red-bright)'
-      case 'sad':         return '#7a9fc4'
-      case 'calm':        return 'var(--cream-dim)'
-      case 'cooperative': return '#7aad7a'
-      default:            return 'var(--cream-dim)'
+      case 'nervous':     return '#b8860b'
+      case 'angry':       return '#8b1a1a'
+      case 'defensive':   return '#8b1a1a'
+      case 'sad':         return '#4a6a8a'
+      case 'calm':        return '#5a4a3a'
+      case 'cooperative': return '#2a6a2a'
+      default:            return '#5a4a3a'
     }
   }
 
@@ -138,44 +138,44 @@ export default function InterviewScreen() {
 
   return (
     <div style={{
-      minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      position: 'relative',
-      zIndex: 1,
+      height: '100%',
+      gap: 0,
     }}>
 
       {/* Header */}
       <div style={{
-        borderBottom: '1px solid var(--border-bright)',
-        padding: '20px 32px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        background: 'var(--bg-surface)',
+        alignItems: 'flex-start',
+        paddingBottom: 12,
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
+        marginBottom: 12,
+        flexShrink: 0,
       }}>
         <div>
           <div style={{
             fontFamily: 'var(--font-courier)',
-            fontSize: 10,
-            letterSpacing: 4,
-            color: 'var(--red-bright)',
+            fontSize: 9,
+            letterSpacing: 3,
+            color: '#8b1a1a',
             textTransform: 'uppercase',
             marginBottom: 4,
           }}>
-            Interrogation Room
+            Interview Transcript
           </div>
           <div style={{
             fontFamily: 'var(--font-playfair)',
-            fontSize: 26,
-            color: 'var(--cream)',
+            fontSize: 'clamp(16px, 2vw, 22px)',
+            color: '#1a1209',
           }}>
             {suspect.name}
           </div>
           <div style={{
             fontFamily: 'var(--font-courier)',
-            fontSize: 12,
-            color: 'var(--cream-dim)',
+            fontSize: 10,
+            color: '#5a4a3a',
             marginTop: 2,
             letterSpacing: 1,
           }}>
@@ -186,25 +186,26 @@ export default function InterviewScreen() {
           onClick={() => navigate('hub')}
           style={{
             background: 'transparent',
-            border: '1px solid var(--border-bright)',
-            color: 'var(--cream-dim)',
+            border: '1px solid rgba(0,0,0,0.2)',
+            color: '#5a4a3a',
             fontFamily: 'var(--font-courier)',
-            fontSize: 11,
+            fontSize: 10,
             letterSpacing: 2,
-            padding: '8px 20px',
+            padding: '6px 14px',
             cursor: 'pointer',
             textTransform: 'uppercase',
+            transition: 'all 0.15s',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.color = 'var(--cream)'
-            e.currentTarget.style.borderColor = 'var(--cream-dim)'
+            e.currentTarget.style.borderColor = '#8b1a1a'
+            e.currentTarget.style.color = '#8b1a1a'
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.color = 'var(--cream-dim)'
-            e.currentTarget.style.borderColor = 'var(--border-bright)'
+            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'
+            e.currentTarget.style.color = '#5a4a3a'
           }}
         >
-          ← Back to Hub
+          ← Back
         </button>
       </div>
 
@@ -212,63 +213,69 @@ export default function InterviewScreen() {
       <div style={{
         flex: 1,
         display: 'grid',
-        gridTemplateColumns: '1fr 300px',
+        gridTemplateColumns: '1fr 220px',
+        gap: 16,
         overflow: 'hidden',
+        minHeight: 0,
       }}>
 
-        {/* Left — interview */}
+        {/* Left — conversation */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          height: 'calc(100vh - 89px)',
+          overflow: 'hidden',
+          minHeight: 0,
         }}>
 
-          {/* Conversation area */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '28px 32px',
-          }}>
-
+          {/* Transcript area */}
+          <div
+            className="doc-scroll"
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              marginBottom: 12,
+              minHeight: 0,
+            }}
+          >
             {localLog.length === 0 && (
               <div style={{
                 textAlign: 'center',
-                padding: '60px 0',
+                padding: '32px 0',
                 fontFamily: 'var(--font-special)',
-                fontSize: 15,
-                color: 'var(--cream-dim)',
+                fontSize: 13,
+                color: '#5a4a3a',
                 fontStyle: 'italic',
                 lineHeight: 1.8,
               }}>
                 {suspect.name} sits across from you.<br />
-                The room is quiet. Ask your first question.
+                Select a question to begin.
               </div>
             )}
 
             {localLog.map((entry, i) => (
-              <div key={i} style={{ marginBottom: 28 }}>
+              <div key={i} style={{ marginBottom: 20 }}>
 
                 {/* Detective question */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  marginBottom: 12,
+                  marginBottom: 8,
                 }}>
                   <div style={{
-                    maxWidth: '75%',
-                    padding: '12px 16px',
-                    background: 'var(--red-dim)',
-                    border: '1px solid var(--red)',
+                    maxWidth: '80%',
+                    padding: '8px 12px',
+                    background: 'rgba(139,26,26,0.08)',
+                    border: '1px solid rgba(139,26,26,0.2)',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 13,
-                    color: 'var(--cream)',
-                    lineHeight: 1.7,
+                    fontSize: 11,
+                    color: '#1a1209',
+                    lineHeight: 1.6,
                   }}>
                     <div style={{
-                      fontSize: 9,
+                      fontSize: 8,
                       letterSpacing: 3,
-                      color: 'var(--red-bright)',
-                      marginBottom: 6,
+                      color: '#8b1a1a',
+                      marginBottom: 4,
                       textTransform: 'uppercase',
                     }}>
                       Detective
@@ -280,31 +287,30 @@ export default function InterviewScreen() {
                 {/* Suspect response */}
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <div style={{
-                    maxWidth: '75%',
-                    padding: '12px 16px',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-bright)',
+                    maxWidth: '80%',
+                    padding: '8px 12px',
+                    background: 'rgba(0,0,0,0.04)',
+                    border: '1px solid rgba(0,0,0,0.12)',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 13,
-                    color: 'var(--cream)',
-                    lineHeight: 1.7,
+                    fontSize: 11,
+                    color: '#1a1209',
+                    lineHeight: 1.6,
                   }}>
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 6,
+                      marginBottom: 4,
                     }}>
                       <div style={{
-                        fontSize: 9,
+                        fontSize: 8,
                         letterSpacing: 3,
-                        color: 'var(--cream-dim)',
+                        color: '#5a4a3a',
                         textTransform: 'uppercase',
                       }}>
                         {suspect.name}
                       </div>
                       <div style={{
-                        fontSize: 9,
+                        fontSize: 8,
                         letterSpacing: 2,
                         color: emotionColor(entry.emotion),
                         textTransform: 'uppercase',
@@ -322,10 +328,10 @@ export default function InterviewScreen() {
             {loading && (
               <div style={{
                 fontFamily: 'var(--font-courier)',
-                fontSize: 13,
-                color: 'var(--cream-dim)',
+                fontSize: 11,
+                color: '#5a4a3a',
                 fontStyle: 'italic',
-                padding: '12px 0',
+                padding: '8px 0',
               }}>
                 {suspect.name} considers your question...
               </div>
@@ -333,26 +339,29 @@ export default function InterviewScreen() {
 
             {error && (
               <div style={{
-                color: 'var(--red-bright)',
+                color: '#8b1a1a',
                 fontFamily: 'var(--font-courier)',
-                fontSize: 13,
-                padding: '8px 0',
+                fontSize: 11,
+                padding: '6px 0',
               }}>
                 ⚠ {error}
               </div>
             )}
           </div>
 
-          {/* Fixed question footer */}
+          {/* Question bank */}
           <div style={{
-            borderTop: '1px solid var(--border-bright)',
-            background: 'var(--bg-surface)',
+            flexShrink: 0,
+            borderTop: '1px solid rgba(0,0,0,0.12)',
+            paddingTop: 10,
           }}>
 
             {/* Category tabs */}
             <div style={{
               display: 'flex',
-              borderBottom: '1px solid var(--border)',
+              gap: 0,
+              borderBottom: '1px solid rgba(0,0,0,0.1)',
+              marginBottom: 10,
               overflowX: 'auto',
             }}>
               {QUESTION_BANK.map(cat => (
@@ -360,18 +369,19 @@ export default function InterviewScreen() {
                   key={cat.category}
                   onClick={() => setActiveCategory(cat.category)}
                   style={{
-                    padding: '10px 16px',
+                    padding: '5px 12px',
                     background: 'transparent',
                     border: 'none',
-                    borderBottom: `2px solid ${activeCategory === cat.category ? 'var(--red-bright)' : 'transparent'}`,
-                    color: activeCategory === cat.category ? 'var(--cream)' : 'var(--cream-dim)',
+                    borderBottom: `2px solid ${activeCategory === cat.category ? '#8b1a1a' : 'transparent'}`,
+                    color: activeCategory === cat.category ? '#8b1a1a' : '#5a4a3a',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 10,
+                    fontSize: 9,
                     letterSpacing: 2,
                     cursor: 'pointer',
                     textTransform: 'uppercase',
                     whiteSpace: 'nowrap',
                     transition: 'all 0.15s',
+                    marginBottom: -1,
                     flexShrink: 0,
                   }}
                 >
@@ -381,18 +391,19 @@ export default function InterviewScreen() {
               <button
                 onClick={() => setActiveCategory('CUSTOM')}
                 style={{
-                  padding: '10px 16px',
+                  padding: '5px 12px',
                   background: 'transparent',
                   border: 'none',
-                  borderBottom: `2px solid ${activeCategory === 'CUSTOM' ? 'var(--red-bright)' : 'transparent'}`,
-                  color: activeCategory === 'CUSTOM' ? 'var(--cream)' : 'var(--cream-dim)',
+                  borderBottom: `2px solid ${activeCategory === 'CUSTOM' ? '#8b1a1a' : 'transparent'}`,
+                  color: activeCategory === 'CUSTOM' ? '#8b1a1a' : '#5a4a3a',
                   fontFamily: 'var(--font-courier)',
-                  fontSize: 10,
+                  fontSize: 9,
                   letterSpacing: 2,
                   cursor: 'pointer',
                   textTransform: 'uppercase',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s',
+                  marginBottom: -1,
                   flexShrink: 0,
                 }}
               >
@@ -400,113 +411,112 @@ export default function InterviewScreen() {
               </button>
             </div>
 
-            {/* Questions or custom input */}
-            <div style={{ padding: '12px 32px 16px' }}>
-              {activeCategory === 'CUSTOM' ? (
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <input
-                    type="text"
-                    value={question}
-                    onChange={e => setQuestion(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && askQuestion(question)}
-                    placeholder="Type your own question..."
+            {/* Questions or input */}
+            {activeCategory === 'CUSTOM' ? (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="text"
+                  value={question}
+                  onChange={e => setQuestion(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && askQuestion(question)}
+                  placeholder="Type your own question..."
+                  disabled={loading}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(0,0,0,0.04)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    color: '#1a1209',
+                    fontFamily: 'var(--font-courier)',
+                    fontSize: 11,
+                    padding: '8px 12px',
+                    outline: 'none',
+                    caretColor: '#8b1a1a',
+                  }}
+                />
+                <button
+                  onClick={() => askQuestion(question)}
+                  disabled={!question.trim() || loading}
+                  style={{
+                    padding: '8px 16px',
+                    background: question.trim() && !loading ? '#8b1a1a' : 'transparent',
+                    border: `1px solid ${question.trim() && !loading ? '#8b1a1a' : 'rgba(0,0,0,0.15)'}`,
+                    color: question.trim() && !loading ? '#f0e6c8' : '#5a4a3a',
+                    fontFamily: 'var(--font-courier)',
+                    fontSize: 10,
+                    letterSpacing: 2,
+                    cursor: question.trim() && !loading ? 'pointer' : 'not-allowed',
+                    textTransform: 'uppercase',
+                    transition: 'all 0.15s',
+                    whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={e => {
+                    if (question.trim() && !loading)
+                      e.currentTarget.style.background = '#6b1212'
+                  }}
+                  onMouseLeave={e => {
+                    if (question.trim() && !loading)
+                      e.currentTarget.style.background = '#8b1a1a'
+                  }}
+                >
+                  ASK →
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {QUESTION_BANK.find(c => c.category === activeCategory)?.questions.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => askQuestion(q)}
                     disabled={loading}
                     style={{
-                      flex: 1,
-                      background: 'var(--bg-panel)',
-                      border: '1px solid var(--border-bright)',
-                      color: 'var(--cream)',
+                      padding: '6px 12px',
+                      background: 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.12)',
+                      color: '#1a1209',
                       fontFamily: 'var(--font-courier)',
-                      fontSize: 13,
-                      padding: '10px 14px',
-                      outline: 'none',
-                      caretColor: 'var(--red-bright)',
-                    }}
-                  />
-                  <button
-                    onClick={() => askQuestion(question)}
-                    disabled={!question.trim() || loading}
-                    style={{
-                      padding: '10px 24px',
-                      background: question.trim() && !loading ? 'var(--red)' : 'transparent',
-                      border: `1px solid ${question.trim() && !loading ? 'var(--red-bright)' : 'var(--border)'}`,
-                      color: question.trim() && !loading ? 'var(--cream)' : 'var(--cream-dim)',
-                      fontFamily: 'var(--font-courier)',
-                      fontSize: 11,
-                      letterSpacing: 2,
-                      cursor: question.trim() && !loading ? 'pointer' : 'not-allowed',
-                      textTransform: 'uppercase',
+                      fontSize: 10,
+                      cursor: loading ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s',
-                      whiteSpace: 'nowrap',
+                      textAlign: 'left',
+                      lineHeight: 1.5,
+                      opacity: loading ? 0.5 : 1,
                     }}
                     onMouseEnter={e => {
-                      if (question.trim() && !loading)
-                        e.currentTarget.style.background = 'var(--red-bright)'
+                      if (!loading) {
+                        e.currentTarget.style.borderColor = '#8b1a1a'
+                        e.currentTarget.style.color = '#8b1a1a'
+                      }
                     }}
                     onMouseLeave={e => {
-                      if (question.trim() && !loading)
-                        e.currentTarget.style.background = 'var(--red)'
+                      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'
+                      e.currentTarget.style.color = '#1a1209'
                     }}
                   >
-                    {loading ? 'ASKING...' : 'ASK →'}
+                    {q}
                   </button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {QUESTION_BANK.find(c => c.category === activeCategory)?.questions.map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => askQuestion(q)}
-                      disabled={loading}
-                      style={{
-                        padding: '8px 14px',
-                        background: 'var(--bg-panel)',
-                        border: '1px solid var(--border-bright)',
-                        color: 'var(--cream-dim)',
-                        fontFamily: 'var(--font-courier)',
-                        fontSize: 12,
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.15s',
-                        textAlign: 'left',
-                        lineHeight: 1.5,
-                        opacity: loading ? 0.5 : 1,
-                      }}
-                      onMouseEnter={e => {
-                        if (!loading) {
-                          e.currentTarget.style.borderColor = 'var(--red-bright)'
-                          e.currentTarget.style.color = 'var(--cream)'
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.borderColor = 'var(--border-bright)'
-                        e.currentTarget.style.color = 'var(--cream-dim)'
-                      }}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right — suspect dossier */}
+        {/* Right — dossier */}
         <div style={{
-          borderLeft: '1px solid var(--border)',
-          background: 'var(--bg-surface)',
-          padding: '24px 20px',
+          borderLeft: '1px solid rgba(0,0,0,0.12)',
+          paddingLeft: 16,
           overflowY: 'auto',
-          height: 'calc(100vh - 89px)',
-        }}>
-
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+          className="doc-scroll"
+        >
           <div style={{
             fontFamily: 'var(--font-courier)',
             fontSize: 9,
-            letterSpacing: 4,
-            color: 'var(--red-bright)',
+            letterSpacing: 3,
+            color: '#8b1a1a',
             textTransform: 'uppercase',
-            marginBottom: 20,
           }}>
             — Dossier —
           </div>
@@ -515,19 +525,19 @@ export default function InterviewScreen() {
           <DossierField label="Alibi" value={suspect.alibi} />
           <DossierField label="Personality" value={suspect.personality} />
 
-          {/* Player tag */}
-          <div style={{ marginBottom: 20 }}>
+          {/* Assessment */}
+          <div>
             <div style={{
               fontFamily: 'var(--font-courier)',
               fontSize: 9,
               letterSpacing: 3,
-              color: 'var(--cream-dim)',
+              color: '#5a4a3a',
               textTransform: 'uppercase',
               marginBottom: 8,
             }}>
-              Your Assessment
+              Assessment
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               {(['none', 'innocent', 'suspicious', 'prime_suspect'] as const).map(tag => (
                 <button
                   key={tag}
@@ -535,12 +545,14 @@ export default function InterviewScreen() {
                     if (activeSuspectId) updateSuspect(activeSuspectId, { playerTag: tag })
                   }}
                   style={{
-                    padding: '6px 12px',
-                    background: suspect.playerTag === tag ? 'var(--red-dim)' : 'transparent',
-                    border: `1px solid ${suspect.playerTag === tag ? 'var(--red-bright)' : 'var(--border)'}`,
-                    color: suspect.playerTag === tag ? 'var(--cream)' : 'var(--cream-dim)',
+                    padding: '5px 10px',
+                    background: suspect.playerTag === tag
+                      ? 'rgba(139,26,26,0.12)' : 'transparent',
+                    border: `1px solid ${suspect.playerTag === tag
+                      ? 'rgba(139,26,26,0.4)' : 'rgba(0,0,0,0.12)'}`,
+                    color: suspect.playerTag === tag ? '#8b1a1a' : '#5a4a3a',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 10,
+                    fontSize: 9,
                     letterSpacing: 2,
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -556,37 +568,37 @@ export default function InterviewScreen() {
             </div>
           </div>
 
-          {/* Player note */}
+          {/* Notes */}
           <div>
             <div style={{
               fontFamily: 'var(--font-courier)',
               fontSize: 9,
               letterSpacing: 3,
-              color: 'var(--cream-dim)',
+              color: '#5a4a3a',
               textTransform: 'uppercase',
-              marginBottom: 8,
+              marginBottom: 6,
             }}>
-              Your Notes
+              Notes
             </div>
             <textarea
               value={suspect.playerNote}
               onChange={e => {
                 if (activeSuspectId) updateSuspect(activeSuspectId, { playerNote: e.target.value })
               }}
-              placeholder="Add your notes..."
-              rows={5}
+              placeholder="Add notes..."
+              rows={4}
               style={{
                 width: '100%',
-                background: 'var(--bg-panel)',
-                border: '1px solid var(--border)',
-                color: 'var(--cream)',
+                background: 'rgba(0,0,0,0.04)',
+                border: '1px solid rgba(0,0,0,0.12)',
+                color: '#1a1209',
                 fontFamily: 'var(--font-courier)',
-                fontSize: 12,
-                padding: '10px 12px',
+                fontSize: 11,
+                padding: '8px 10px',
                 resize: 'none',
                 outline: 'none',
-                lineHeight: 1.7,
-                caretColor: 'var(--red-bright)',
+                lineHeight: 1.6,
+                caretColor: '#8b1a1a',
               }}
             />
           </div>
@@ -598,21 +610,21 @@ export default function InterviewScreen() {
 
 function DossierField({ label, value }: { label: string, value: string }) {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div>
       <div style={{
         fontFamily: 'var(--font-courier)',
         fontSize: 9,
         letterSpacing: 3,
-        color: 'var(--cream-dim)',
+        color: '#5a4a3a',
         textTransform: 'uppercase',
-        marginBottom: 6,
+        marginBottom: 4,
       }}>
         {label}
       </div>
       <div style={{
         fontFamily: 'var(--font-courier)',
-        fontSize: 12,
-        color: 'var(--cream)',
+        fontSize: 11,
+        color: '#1a1209',
         lineHeight: 1.7,
       }}>
         {value}
