@@ -120,3 +120,12 @@ body::before {
 .doc-border {
   border-color: rgba(0,0,0,0.15);
 }
+
+/* Hide scrollbars on document */
+.doc-scroll::-webkit-scrollbar {
+  display: none;
+}
+.doc-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
