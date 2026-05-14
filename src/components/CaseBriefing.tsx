@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
 export default function CaseBriefing() {
-  const navigate    = useCaseStore(s => s.navigate)
-  const activeCase  = useCaseStore(s => s.activeCase)
+  const navigate   = useCaseStore(s => s.navigate)
+  const activeCase = useCaseStore(s => s.activeCase)
   const [step, setStep] = useState(0)
 
   useEffect(() => {
@@ -22,14 +22,11 @@ export default function CaseBriefing() {
 
   return (
     <div style={{
-      minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '60px 24px',
-      position: 'relative',
-      zIndex: 1,
+      padding: '20px 0',
+      gap: 24,
     }}>
 
       {/* Case stamp */}
@@ -38,27 +35,25 @@ export default function CaseBriefing() {
         transform: show(1) ? 'translateY(0)' : 'translateY(12px)',
         transition: 'all 0.6s ease',
         textAlign: 'center',
-        marginBottom: 40,
       }}>
         <div style={{
           display: 'inline-block',
-          border: '2px solid var(--red)',
-          padding: '6px 20px',
+          border: '2px solid #8b1a1a',
+          padding: '4px 16px',
           fontFamily: 'var(--font-courier)',
-          fontSize: 11,
-          letterSpacing: 6,
-          color: 'var(--red-bright)',
+          fontSize: 10,
+          letterSpacing: 5,
+          color: '#8b1a1a',
           textTransform: 'uppercase',
-          marginBottom: 20,
+          marginBottom: 12,
         }}>
           Case File — {activeCase.genre.toUpperCase()}
         </div>
         <div style={{
           fontFamily: 'var(--font-playfair)',
-          fontSize: 'clamp(28px, 5vw, 48px)',
-          color: 'var(--cream)',
-          letterSpacing: 2,
-          textShadow: '0 0 30px rgba(139,26,26,0.3)',
+          fontSize: 'clamp(22px, 3.5vw, 36px)',
+          color: '#1a1209',
+          letterSpacing: 1,
         }}>
           {activeCase.title}
         </div>
@@ -69,128 +64,185 @@ export default function CaseBriefing() {
         opacity: show(2) ? 1 : 0,
         transform: show(2) ? 'translateY(0)' : 'translateY(12px)',
         transition: 'all 0.6s ease',
-        maxWidth: 600,
+        maxWidth: 560,
         textAlign: 'center',
-        marginBottom: 40,
       }}>
         <div style={{
           fontFamily: 'var(--font-special)',
-          fontSize: 15,
-          color: 'var(--cream-dim)',
+          fontSize: 13,
+          color: '#5a4a3a',
           lineHeight: 1.8,
-          letterSpacing: 1,
           fontStyle: 'italic',
+          borderLeft: '3px solid #8b1a1a',
+          paddingLeft: 16,
+          textAlign: 'left',
         }}>
           {activeCase.setting}
         </div>
       </div>
 
-      {/* Victim + Crime */}
+      {/* Victim + Crime cards */}
       <div style={{
         opacity: show(3) ? 1 : 0,
         transform: show(3) ? 'translateY(0)' : 'translateY(12px)',
         transition: 'all 0.6s ease',
         width: '100%',
-        maxWidth: 600,
-        marginBottom: 32,
       }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: 20,
+          gap: 16,
         }}>
-          <CaseCard label="VICTIM">
+
+          {/* Victim card */}
+          <div style={{
+            background: 'rgba(0,0,0,0.05)',
+            border: '1px solid rgba(0,0,0,0.12)',
+            padding: '16px',
+          }}>
+            <div style={{
+              fontFamily: 'var(--font-courier)',
+              fontSize: 9,
+              letterSpacing: 3,
+              color: '#8b1a1a',
+              textTransform: 'uppercase',
+              marginBottom: 10,
+            }}>
+              — Victim —
+            </div>
             <div style={{
               fontFamily: 'var(--font-playfair)',
-              fontSize: 28,
-              color: 'var(--cream)',
-              marginBottom: 6,
-              lineHeight: 1.1,
+              fontSize: 'clamp(16px, 2vw, 22px)',
+              color: '#1a1209',
+              marginBottom: 4,
+              lineHeight: 1.2,
             }}>
               {activeCase.victim.name}
             </div>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              color: 'var(--red-bright)',
-              marginBottom: 12,
+              fontSize: 11,
+              color: '#8b1a1a',
+              marginBottom: 10,
               letterSpacing: 1,
             }}>
               {activeCase.victim.age} — {activeCase.victim.occupation}
             </div>
             <div style={{
-              width: 40,
+              width: 32,
               height: 1,
-              background: 'var(--border-bright)',
-              marginBottom: 12,
+              background: 'rgba(0,0,0,0.2)',
+              marginBottom: 10,
             }} />
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              color: 'var(--cream-dim)',
+              fontSize: 11,
+              color: '#5a4a3a',
               lineHeight: 1.8,
             }}>
               {activeCase.victim.background}
             </div>
-          </CaseCard>
+          </div>
 
-          <CaseCard label="THE CRIME">
+          {/* Crime card */}
+          <div style={{
+            background: 'rgba(0,0,0,0.05)',
+            border: '1px solid rgba(0,0,0,0.12)',
+            padding: '16px',
+          }}>
+            <div style={{
+              fontFamily: 'var(--font-courier)',
+              fontSize: 9,
+              letterSpacing: 3,
+              color: '#8b1a1a',
+              textTransform: 'uppercase',
+              marginBottom: 10,
+            }}>
+              — The Crime —
+            </div>
             <div style={{
               fontFamily: 'var(--font-playfair)',
-              fontSize: 28,
-              color: 'var(--red-bright)',
-              marginBottom: 6,
+              fontSize: 'clamp(18px, 2.5vw, 26px)',
+              color: '#8b1a1a',
+              marginBottom: 4,
               textTransform: 'capitalize',
-              lineHeight: 1.1,
+              lineHeight: 1.2,
             }}>
               {activeCase.crime.type}
             </div>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              color: 'var(--cream-dim)',
-              marginBottom: 12,
+              fontSize: 11,
+              color: '#5a4a3a',
+              marginBottom: 10,
               letterSpacing: 1,
             }}>
               {activeCase.crime.time}
             </div>
             <div style={{
-              width: 40,
+              width: 32,
               height: 1,
-              background: 'var(--border-bright)',
-              marginBottom: 12,
+              background: 'rgba(0,0,0,0.2)',
+              marginBottom: 10,
             }} />
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              color: 'var(--cream-dim)',
+              fontSize: 11,
+              color: '#5a4a3a',
               lineHeight: 1.8,
             }}>
               <div style={{ marginBottom: 6 }}>
-                <span style={{ color: 'var(--cream)', letterSpacing: 1 }}>METHOD</span>
+                <span style={{ color: '#1a1209', letterSpacing: 1, textTransform: 'uppercase', fontSize: 9 }}>Method</span>
                 <br />{activeCase.crime.method}
               </div>
               <div>
-                <span style={{ color: 'var(--cream)', letterSpacing: 1 }}>LOCATION</span>
+                <span style={{ color: '#1a1209', letterSpacing: 1, textTransform: 'uppercase', fontSize: 9 }}>Location</span>
                 <br />{activeCase.crime.location}
               </div>
             </div>
-          </CaseCard>
+          </div>
         </div>
       </div>
 
-      {/* Suspects count + evidence count */}
+      {/* Stats */}
       <div style={{
         opacity: show(4) ? 1 : 0,
         transform: show(4) ? 'translateY(0)' : 'translateY(12px)',
         transition: 'all 0.6s ease',
         display: 'flex',
-        gap: 24,
-        marginBottom: 48,
+        gap: 16,
       }}>
-        <StatPill label="SUSPECTS" value={activeCase.suspects.length} />
-        <StatPill label="LOCATIONS" value={activeCase.locations.length} />
-        <StatPill label="EVIDENCE" value={activeCase.evidence.length} />
+        {[
+          { label: 'SUSPECTS',  value: activeCase.suspects.length },
+          { label: 'LOCATIONS', value: activeCase.locations.length },
+          { label: 'EVIDENCE',  value: activeCase.evidence.length },
+        ].map(({ label, value }) => (
+          <div key={label} style={{
+            textAlign: 'center',
+            padding: '10px 20px',
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: 'rgba(0,0,0,0.04)',
+          }}>
+            <div style={{
+              fontFamily: 'var(--font-playfair)',
+              fontSize: 28,
+              color: '#1a1209',
+              lineHeight: 1,
+              marginBottom: 4,
+            }}>
+              {value}
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-courier)',
+              fontSize: 8,
+              letterSpacing: 3,
+              color: '#5a4a3a',
+              textTransform: 'uppercase',
+            }}>
+              {label}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Begin button */}
@@ -202,77 +254,24 @@ export default function CaseBriefing() {
         <button
           onClick={() => navigate('hub')}
           style={{
-            padding: '14px 48px',
-            background: 'var(--red)',
-            border: '1px solid var(--red-bright)',
-            color: 'var(--cream)',
+            padding: '12px 40px',
+            background: '#8b1a1a',
+            border: '1px solid #8b1a1a',
+            color: '#f0e6c8',
             fontFamily: 'var(--font-courier)',
-            fontSize: 13,
+            fontSize: 12,
             letterSpacing: 4,
             cursor: 'pointer',
             textTransform: 'uppercase',
             transition: 'all 0.2s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--red-bright)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--red)'}
+          onMouseEnter={e => e.currentTarget.style.background = '#6b1212'}
+          onMouseLeave={e => e.currentTarget.style.background = '#8b1a1a'}
         >
           BEGIN INVESTIGATION →
         </button>
       </div>
 
-    </div>
-  )
-}
-
-function CaseCard({ label, children }: { label: string, children: React.ReactNode }) {
-  return (
-    <div style={{
-      background: 'var(--bg-surface)',
-      border: '1px solid var(--border-bright)',
-      padding: '24px 20px',
-      position: 'relative',
-    }}>
-      <div style={{
-        fontFamily: 'var(--font-courier)',
-        fontSize: 12,
-        letterSpacing: 4,
-        color: 'var(--red-bright)',
-        textTransform: 'uppercase',
-        marginBottom: 16,
-      }}>
-        {label}
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function StatPill({ label, value }: { label: string, value: number }) {
-  return (
-    <div style={{
-      textAlign: 'center',
-      padding: '12px 24px',
-      border: '1px solid var(--border-bright)',
-      background: 'var(--bg-surface)',
-    }}>
-      <div style={{
-        fontFamily: 'var(--font-playfair)',
-        fontSize: 28,
-        color: 'var(--cream)',
-        lineHeight: 1,
-        marginBottom: 4,
-      }}>
-        {value}
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-courier)',
-        fontSize: 9,
-        letterSpacing: 3,
-        color: 'var(--cream-dim)',
-        textTransform: 'uppercase',
-      }}>
-        {label}
-      </div>
     </div>
   )
 }
