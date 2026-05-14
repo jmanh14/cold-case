@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useCaseStore } from '@/store/caseStore'
 
 export default function LocationScreen() {
-  const navigate          = useCaseStore(s => s.navigate)
-  const activeCase        = useCaseStore(s => s.activeCase)
-  const investigation     = useCaseStore(s => s.investigation)
-  const activeLocationId  = useCaseStore(s => s.activeLocationId)
+  const navigate            = useCaseStore(s => s.navigate)
+  const activeCase          = useCaseStore(s => s.activeCase)
+  const investigation       = useCaseStore(s => s.investigation)
+  const activeLocationId    = useCaseStore(s => s.activeLocationId)
+  const setActiveSuspect    = useCaseStore(s => s.setActiveSuspect)
   const markLocationVisited = useCaseStore(s => s.markLocationVisited)
-  const discoverEvidence  = useCaseStore(s => s.discoverEvidence)
-  const setActiveSuspect = useCaseStore(s => s.setActiveSuspect)
+  const discoverEvidence    = useCaseStore(s => s.discoverEvidence)
 
   const [loading, setLoading]     = useState(false)
   const [narrative, setNarrative] = useState<string | null>(null)
@@ -20,18 +20,14 @@ export default function LocationScreen() {
 
   if (!activeCase || !investigation || !activeLocationId) return null
 
-  const location = activeCase.locations.find(l => l.id === activeLocationId)!
+  const locationId = activeLocationId
+  const location        = activeCase.locations.find(l => l.id === locationId)!
   const alreadySearched = investigation.visitedLocations.includes(activeLocationId)
-  const suspectsHere = activeCase.suspects.filter(s =>
-    location.suspectIds.includes(s.id)
-  )
-
-  const previousClues = activeCase.evidence
-    .filter(e => e.discovered)
-    .map(e => e.name)
+  const suspectsHere    = activeCase.suspects.filter(s => location.suspectIds.includes(s.id))
+  const previousClues   = activeCase.evidence.filter(e => e.discovered).map(e => e.name)
 
   async function handleSearch() {
-    if (loading || searched || !activeLocationId) return
+    if (loading || searched) return
     setLoading(true)
     setError(null)
 
@@ -41,7 +37,7 @@ export default function LocationScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           activeCase,
-          locationId: activeLocationId,
+          locationId: locationId,
           previousClues,
         }),
       })
@@ -51,11 +47,8 @@ export default function LocationScreen() {
       const data = await res.json()
       setNarrative(data.narrative)
       setSearched(true)
+      markLocationVisited(locationId)
 
-      // mark location visited
-      markLocationVisited(activeLocationId)
-
-      // discover evidence
       if (data.foundEvidenceIds?.length > 0) {
         data.foundEvidenceIds.forEach((id: string) => discoverEvidence(id))
         const foundNames = activeCase?.evidence
@@ -73,38 +66,31 @@ export default function LocationScreen() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      zIndex: 1,
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}>
 
-      {/* Header */}
+      {/* Back + title */}
       <div style={{
-        borderBottom: '1px solid var(--border-bright)',
-        padding: '20px 32px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        background: 'var(--bg-surface)',
+        alignItems: 'flex-start',
+        paddingBottom: 12,
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
       }}>
         <div>
           <div style={{
             fontFamily: 'var(--font-courier)',
-            fontSize: 10,
-            letterSpacing: 4,
-            color: 'var(--red-bright)',
+            fontSize: 9,
+            letterSpacing: 3,
+            color: '#8b1a1a',
             textTransform: 'uppercase',
             marginBottom: 4,
           }}>
-            Location
+            Location Report
           </div>
           <div style={{
             fontFamily: 'var(--font-playfair)',
-            fontSize: 26,
-            color: 'var(--cream)',
+            fontSize: 'clamp(18px, 2.5vw, 26px)',
+            color: '#1a1209',
           }}>
             {location.name}
           </div>
@@ -113,66 +99,61 @@ export default function LocationScreen() {
           onClick={() => navigate('hub')}
           style={{
             background: 'transparent',
-            border: '1px solid var(--border-bright)',
-            color: 'var(--cream-dim)',
+            border: '1px solid rgba(0,0,0,0.2)',
+            color: '#5a4a3a',
             fontFamily: 'var(--font-courier)',
-            fontSize: 11,
+            fontSize: 10,
             letterSpacing: 2,
-            padding: '8px 20px',
+            padding: '6px 14px',
             cursor: 'pointer',
             textTransform: 'uppercase',
+            transition: 'all 0.15s',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.color = 'var(--cream)'
-            e.currentTarget.style.borderColor = 'var(--cream-dim)'
+            e.currentTarget.style.borderColor = '#8b1a1a'
+            e.currentTarget.style.color = '#8b1a1a'
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.color = 'var(--cream-dim)'
-            e.currentTarget.style.borderColor = 'var(--border-bright)'
+            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'
+            e.currentTarget.style.color = '#5a4a3a'
           }}
         >
-          ← Back to Hub
+          ← Back
         </button>
       </div>
 
-      {/* Content */}
-      <div style={{
-        flex: 1,
-        padding: '32px',
-        maxWidth: 800,
-        margin: '0 auto',
-        width: '100%',
-      }}>
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto' }} className="doc-scroll">
 
         {/* Location description */}
         <div style={{
           fontFamily: 'var(--font-special)',
-          fontSize: 15,
-          color: 'var(--cream-dim)',
+          fontSize: 13,
+          color: '#5a4a3a',
           lineHeight: 1.9,
           fontStyle: 'italic',
-          marginBottom: 32,
-          padding: '20px 24px',
-          borderLeft: '3px solid var(--red)',
-          background: 'var(--bg-surface)',
+          marginBottom: 20,
+          padding: '12px 16px',
+          borderLeft: '3px solid #8b1a1a',
+          background: 'rgba(0,0,0,0.03)',
         }}>
           {location.description}
         </div>
 
         {/* Suspects here */}
         {suspectsHere.length > 0 && (
-          <div style={{ marginBottom: 32 }}>
+          <div style={{ marginBottom: 20 }}>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 10,
-              letterSpacing: 4,
-              color: 'var(--red-bright)',
+              fontSize: 9,
+              letterSpacing: 3,
+              color: '#8b1a1a',
               textTransform: 'uppercase',
-              marginBottom: 12,
+              marginBottom: 10,
             }}>
-              Persons of Interest Here
+              Persons of Interest
             </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {suspectsHere.map(suspect => (
                 <button
                   key={suspect.id}
@@ -181,23 +162,23 @@ export default function LocationScreen() {
                     navigate('interview')
                   }}
                   style={{
-                    padding: '8px 16px',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-bright)',
-                    color: 'var(--cream-dim)',
+                    padding: '6px 14px',
+                    background: 'rgba(0,0,0,0.04)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    color: '#1a1209',
                     fontFamily: 'var(--font-courier)',
-                    fontSize: 12,
+                    fontSize: 11,
                     cursor: 'pointer',
                     transition: 'all 0.15s',
                     letterSpacing: 1,
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = 'var(--red-bright)'
-                    e.currentTarget.style.color = 'var(--cream)'
+                    e.currentTarget.style.borderColor = '#8b1a1a'
+                    e.currentTarget.style.color = '#8b1a1a'
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = 'var(--border-bright)'
-                    e.currentTarget.style.color = 'var(--cream-dim)'
+                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
+                    e.currentTarget.style.color = '#1a1209'
                   }}
                 >
                   {suspect.name} →
@@ -207,26 +188,23 @@ export default function LocationScreen() {
           </div>
         )}
 
-        {/* Search results */}
+        {/* Search narrative */}
         {narrative && (
-          <div style={{
-            marginBottom: 32,
-            animation: 'fadeIn 0.6s ease forwards',
-          }}>
+          <div style={{ marginBottom: 20 }}>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 10,
-              letterSpacing: 4,
-              color: 'var(--red-bright)',
+              fontSize: 9,
+              letterSpacing: 3,
+              color: '#8b1a1a',
               textTransform: 'uppercase',
-              marginBottom: 16,
+              marginBottom: 10,
             }}>
               Search Report
             </div>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 14,
-              color: 'var(--cream)',
+              fontSize: 12,
+              color: '#1a1209',
               lineHeight: 1.9,
               whiteSpace: 'pre-wrap',
             }}>
@@ -238,27 +216,26 @@ export default function LocationScreen() {
         {/* New evidence found */}
         {newFinds.length > 0 && (
           <div style={{
-            marginBottom: 32,
-            padding: '16px 20px',
-            border: '1px solid var(--red-bright)',
-            background: 'var(--bg-surface)',
-            animation: 'fadeIn 0.6s ease 0.3s both',
+            marginBottom: 20,
+            padding: '12px 16px',
+            border: '1px solid rgba(139,26,26,0.4)',
+            background: 'rgba(139,26,26,0.05)',
           }}>
             <div style={{
               fontFamily: 'var(--font-courier)',
-              fontSize: 10,
-              letterSpacing: 4,
-              color: 'var(--red-bright)',
+              fontSize: 9,
+              letterSpacing: 3,
+              color: '#8b1a1a',
               textTransform: 'uppercase',
-              marginBottom: 12,
+              marginBottom: 10,
             }}>
               — Evidence Discovered —
             </div>
             {newFinds.map((name, i) => (
               <div key={i} style={{
                 fontFamily: 'var(--font-playfair)',
-                fontSize: 16,
-                color: 'var(--cream)',
+                fontSize: 15,
+                color: '#1a1209',
                 marginBottom: 4,
               }}>
                 + {name}
@@ -267,14 +244,13 @@ export default function LocationScreen() {
           </div>
         )}
 
-        {/* Already searched notice */}
+        {/* Already searched */}
         {alreadySearched && !searched && (
           <div style={{
-            marginBottom: 24,
+            marginBottom: 16,
             fontFamily: 'var(--font-courier)',
-            fontSize: 12,
-            color: 'var(--cream-dim)',
-            letterSpacing: 1,
+            fontSize: 11,
+            color: '#5a4a3a',
             fontStyle: 'italic',
           }}>
             You have already searched this location.
@@ -284,63 +260,58 @@ export default function LocationScreen() {
         {/* Error */}
         {error && (
           <div style={{
-            marginBottom: 24,
-            color: 'var(--red-bright)',
+            marginBottom: 16,
+            color: '#8b1a1a',
             fontFamily: 'var(--font-courier)',
-            fontSize: 13,
-            letterSpacing: 1,
+            fontSize: 12,
           }}>
             ⚠ {error}
           </div>
         )}
 
-        {/* Search button */}
-        {!searched && (
+        {/* Buttons */}
+        {!searched ? (
           <button
             onClick={handleSearch}
             disabled={loading}
             style={{
-              padding: '14px 40px',
-              background: loading ? 'transparent' : 'var(--red)',
-              border: `1px solid ${loading ? 'var(--border)' : 'var(--red-bright)'}`,
-              color: loading ? 'var(--cream-dim)' : 'var(--cream)',
+              padding: '10px 32px',
+              background: loading ? 'transparent' : '#8b1a1a',
+              border: `1px solid ${loading ? 'rgba(0,0,0,0.2)' : '#8b1a1a'}`,
+              color: loading ? '#5a4a3a' : '#f0e6c8',
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              letterSpacing: 4,
+              fontSize: 11,
+              letterSpacing: 3,
               cursor: loading ? 'not-allowed' : 'pointer',
               textTransform: 'uppercase',
               transition: 'all 0.2s',
             }}
             onMouseEnter={e => {
-              if (!loading) e.currentTarget.style.background = 'var(--red-bright)'
+              if (!loading) e.currentTarget.style.background = '#6b1212'
             }}
             onMouseLeave={e => {
-              if (!loading) e.currentTarget.style.background = 'var(--red)'
+              if (!loading) e.currentTarget.style.background = '#8b1a1a'
             }}
           >
             {loading ? 'SEARCHING...' : alreadySearched ? 'SEARCH AGAIN' : 'SEARCH LOCATION'}
           </button>
-        )}
-
-        {/* After search — back to hub */}
-        {searched && (
+        ) : (
           <button
             onClick={() => navigate('hub')}
             style={{
-              padding: '14px 40px',
-              background: 'var(--red)',
-              border: '1px solid var(--red-bright)',
-              color: 'var(--cream)',
+              padding: '10px 32px',
+              background: '#8b1a1a',
+              border: '1px solid #8b1a1a',
+              color: '#f0e6c8',
               fontFamily: 'var(--font-courier)',
-              fontSize: 13,
-              letterSpacing: 4,
+              fontSize: 11,
+              letterSpacing: 3,
               cursor: 'pointer',
               textTransform: 'uppercase',
               transition: 'all 0.2s',
-              animation: 'fadeIn 0.6s ease 0.6s both',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--red-bright)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--red)'}
+            onMouseEnter={e => e.currentTarget.style.background = '#6b1212'}
+            onMouseLeave={e => e.currentTarget.style.background = '#8b1a1a'}
           >
             RETURN TO HUB →
           </button>
